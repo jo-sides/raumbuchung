@@ -11,17 +11,23 @@
   .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
   select, button { font-size: 14px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
   button { cursor: pointer; }
-  button.nav { padding: 7px 12px; }
   #dayLabel { font-weight: bold; min-width: 160px; text-align: center; }
   #status { font-size: 12px; color: #888; margin-bottom: 10px; }
-  #grid { display: grid; border-top: 1px solid #ddd; border-left: 1px solid #ddd; user-select: none; background: #fff; }
-  .cell { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 6px 5px; font-size: 12px; min-height: 18px; }
-  .head { font-weight: bold; background: #f0f0ee; }
-  .frei { cursor: pointer; }
-  .frei:hover { background: #fdecea; }
+
+  #kalender { display: flex; background: #fff; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
+  .zeitachse { width: 46px; flex-shrink: 0; position: relative; border-right: 1px solid #ddd; }
+  .zeitachse .marke { position: absolute; left: 0; right: 0; font-size: 10px; color: #999; transform: translateY(-50%); text-align: right; padding-right: 4px; box-sizing: border-box; }
+  .spalten { flex: 1; display: flex; }
+  .raumKopf { text-align: center; font-weight: bold; font-size: 12px; padding: 8px 4px; border-bottom: 1px solid #ddd; border-left: 1px solid #eee; background: #f8f6f4; }
+  .raumSpalte { flex: 1; position: relative; border-left: 1px solid #eee; background-image: repeating-linear-gradient(to bottom, transparent, transparent 59px, #f0f0ee 59px, #f0f0ee 60px); cursor: crosshair; }
+  .kopfZeile { display: flex; }
+  .kopfZeile .raumKopf { flex: 1; }
+
+  .block { position: absolute; left: 2px; right: 2px; border-radius: 4px; font-size: 11px; padding: 3px 5px; box-sizing: border-box; overflow: hidden; }
   .belegt { background: #c1121f; color: #fff; }
   .angefragt { background: #f9a825; color: #3a2a00; }
-  .sel { background: #ffd7c2; }
+  .neu { background: #ffb199; border: 1px dashed #c1121f; color: #5a1200; pointer-events: none; }
+
   #overlay { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 10; }
   #modal { background: #fff; border-radius: 10px; padding: 20px; width: 300px; }
   #modal input { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
@@ -32,16 +38,23 @@
 </head>
 <body>
   <h1>Raumbelegung Johanniter Bergstraße-Pfalz</h1>
-  <p class="sub">Freie Zeit anklicken und ziehen, um eine Raumanfrage zu stellen.</p>
+  <p class="sub">Auf einen freien Bereich klicken und ziehen, um eine Raumanfrage zu stellen — 15-Minuten-genau.</p>
 
   <div class="toolbar">
     <select id="standortSelect"></select>
-    <button class="nav" id="prevDay">←</button>
+    <button id="prevDay">←</button>
     <span id="dayLabel"></span>
-    <button class="nav" id="nextDay">→</button>
+    <button id="nextDay">→</button>
   </div>
   <div id="status">Lade Daten…</div>
-  <div id="grid"></div>
+
+  <div id="kalender">
+    <div class="zeitachse" id="zeitachse"></div>
+    <div style="flex:1">
+      <div class="kopfZeile" id="kopfZeile"></div>
+      <div class="spalten" id="spalten"></div>
+    </div>
+  </div>
 
   <div id="overlay">
     <div id="modal">
@@ -71,19 +84,27 @@ const RAEUME = {
   "Speyer": ["Seminarraum"],
   "Frankenthal": ["Seminarraum"]
 };
-const STUNDEN = Array.from({length: 13}, (_, i) => i + 7); // 7 bis 19 Uhr
+
+const TAG_START = 7 * 60;   // 07:00 in Minuten
+const TAG_ENDE = 20 * 60;   // 20:00 in Minuten
+const PX_PRO_MIN = 1;       // 1 Minute = 1 Pixel -> 780px hoch
+const RASTER = 15;          // Minuten-Raster
+const HOEHE = (TAG_ENDE - TAG_START) * PX_PRO_MIN;
 
 let aktuellerStandort = "Viernheim";
-let aktuellesDatum = new Date(2026, 2, 5); // Testdatum: 5. März 2026, passend zu den Beispieldaten
+let aktuellesDatum = new Date(2026, 2, 5);
 let buchungen = [];
-let shaAktuell = null;
-let selRaum = null, selStart = null, selEnde = null, selecting = false;
+let ziehend = false, ziehRaum = null, ziehStartY = 0, ziehAktY = 0;
 
-function fmtDatum(d) {
-  return d.toISOString().slice(0,10);
+function fmtDatum(d) { return d.toISOString().slice(0,10); }
+function fmtLabel(d) { return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long' }); }
+function minZuUhrzeit(min) {
+  const h = Math.floor(min / 60), m = min % 60;
+  return String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
 }
-function fmtLabel(d) {
-  return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long' });
+function uhrzeitZuMin(str) {
+  const [h, m] = str.split(':').map(Number);
+  return h * 60 + m;
 }
 function b64DecodeUnicode(str) {
   return decodeURIComponent(atob(str).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
@@ -97,13 +118,11 @@ async function ladeDaten() {
   const res = await fetch(API, { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" } });
   const json = await res.json();
   buchungen = JSON.parse(b64DecodeUnicode(json.content));
-  shaAktuell = json.sha;
   document.getElementById('status').textContent = buchungen.length + " Buchungen geladen — Stand: " + new Date().toLocaleTimeString('de-DE');
   render();
 }
 
 async function speichereNeueBuchung(neu) {
-  // Vor dem Schreiben nochmal aktuellen Stand holen, um Konflikte zu vermeiden
   const res = await fetch(API, { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" } });
   const json = await res.json();
   const liste = JSON.parse(b64DecodeUnicode(json.content));
@@ -125,99 +144,145 @@ function initStandortSelect() {
     sel.appendChild(opt);
   });
   sel.value = aktuellerStandort;
-  sel.addEventListener('change', () => { aktuellerStandort = sel.value; selRaum = null; render(); });
+  sel.addEventListener('change', () => { aktuellerStandort = sel.value; render(); });
+}
+
+function renderZeitachse() {
+  const achse = document.getElementById('zeitachse');
+  achse.style.height = HOEHE + "px";
+  achse.innerHTML = "";
+  for (let m = TAG_START; m <= TAG_ENDE; m += 60) {
+    const marke = document.createElement('div');
+    marke.className = "marke";
+    marke.style.top = ((m - TAG_START) * PX_PRO_MIN) + "px";
+    marke.textContent = minZuUhrzeit(m);
+    achse.appendChild(marke);
+  }
 }
 
 function render() {
   document.getElementById('dayLabel').textContent = fmtLabel(aktuellesDatum);
   const raeume = RAEUME[aktuellerStandort];
-  const grid = document.getElementById('grid');
-  grid.style.gridTemplateColumns = `50px repeat(${raeume.length}, 1fr)`;
-  grid.innerHTML = "";
-
-  grid.appendChild(makeCell("", true));
-  raeume.forEach(r => grid.appendChild(makeCell(r, true)));
-
   const datumStr = fmtDatum(aktuellesDatum);
 
-  STUNDEN.forEach(std => {
-    grid.appendChild(makeCell(std + ":00", true));
-    raeume.forEach(raum => {
-      const treffer = buchungen.find(b =>
-        b.standort === aktuellerStandort && b.raum === raum && b.datum === datumStr &&
-        std >= parseInt(b.von.split(':')[0]) && std < parseInt(b.bis.split(':')[0])
-      );
-      const cell = document.createElement('div');
-      cell.className = "cell";
-      cell.dataset.raum = raum;
-      cell.dataset.std = std;
-      if (treffer) {
-        cell.classList.add(treffer.status === "angefragt" ? "angefragt" : "belegt");
-        cell.title = `${treffer.von}–${treffer.bis} (${treffer.status})`;
-      } else {
-        cell.classList.add("frei");
-        cell.addEventListener('mousedown', () => { selecting = true; selRaum = raum; selStart = std; selEnde = std; markiere(); });
-        cell.addEventListener('mouseenter', () => { if (selecting && raum === selRaum) { selEnde = std; markiere(); } });
-        cell.addEventListener('mouseup', () => { if (selecting) { selecting = false; oeffneModal(); } });
-      }
-      grid.appendChild(cell);
+  renderZeitachse();
+
+  const kopf = document.getElementById('kopfZeile');
+  kopf.innerHTML = "";
+  raeume.forEach(r => {
+    const d = document.createElement('div');
+    d.className = "raumKopf";
+    d.textContent = r;
+    kopf.appendChild(d);
+  });
+
+  const spalten = document.getElementById('spalten');
+  spalten.innerHTML = "";
+  raeume.forEach(raum => {
+    const spalte = document.createElement('div');
+    spalte.className = "raumSpalte";
+    spalte.style.height = HOEHE + "px";
+    spalte.dataset.raum = raum;
+
+    buchungen
+      .filter(b => b.standort === aktuellerStandort && b.raum === raum && b.datum === datumStr)
+      .forEach(b => {
+        const start = uhrzeitZuMin(b.von), ende = uhrzeitZuMin(b.bis);
+        const block = document.createElement('div');
+        block.className = "block " + (b.status === "angefragt" ? "angefragt" : "belegt");
+        block.style.top = ((start - TAG_START) * PX_PRO_MIN) + "px";
+        block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 14) + "px";
+        block.textContent = b.von + "–" + b.bis;
+        block.title = `${b.von}–${b.bis} (${b.status})`;
+        spalte.appendChild(block);
+      });
+
+    spalte.addEventListener('mousedown', (e) => {
+      const rect = spalte.getBoundingClientRect();
+      ziehend = true; ziehRaum = raum;
+      ziehStartY = e.clientY - rect.top;
+      ziehAktY = ziehStartY;
+      zeichneVorschau(spalte);
     });
+    spalte.addEventListener('mousemove', (e) => {
+      if (!ziehend || spalte.dataset.raum !== ziehRaum) return;
+      const rect = spalte.getBoundingClientRect();
+      ziehAktY = e.clientY - rect.top;
+      zeichneVorschau(spalte);
+    });
+    window.addEventListener('mouseup', () => {
+      if (!ziehend) return;
+      ziehend = false;
+      const vorschau = document.getElementById('vorschauBlock');
+      if (vorschau) {
+        const lo = Math.min(ziehStartY, ziehAktY), hi = Math.max(ziehStartY, ziehAktY);
+        if (hi - lo >= RASTER * PX_PRO_MIN) {
+          oeffneModal(ziehRaum, lo, hi);
+        }
+        vorschau.remove();
+      }
+    });
+
+    spalten.appendChild(spalte);
   });
 }
 
-function markiere() {
-  render();
-  if (!selRaum) return;
-  const lo = Math.min(selStart, selEnde), hi = Math.max(selStart, selEnde);
-  document.querySelectorAll('.cell.frei').forEach(c => {
-    if (c.dataset.raum === selRaum) {
-      const std = parseInt(c.dataset.std);
-      if (std >= lo && std <= hi) c.classList.add('sel');
-    }
-  });
+function schnappen(y) {
+  const minuten = y / PX_PRO_MIN;
+  return Math.round(minuten / RASTER) * RASTER;
 }
 
-function makeCell(text, isHead) {
-  const d = document.createElement('div');
-  d.className = "cell" + (isHead ? " head" : "");
-  d.textContent = text;
-  return d;
+function zeichneVorschau(spalte) {
+  let vorschau = document.getElementById('vorschauBlock');
+  if (!vorschau) {
+    vorschau = document.createElement('div');
+    vorschau.id = "vorschauBlock";
+    vorschau.className = "block neu";
+    spalte.appendChild(vorschau);
+  }
+  const lo = Math.min(ziehStartY, ziehAktY), hi = Math.max(ziehStartY, ziehAktY);
+  const startMin = TAG_START + schnappen(lo);
+  const endeMin = TAG_START + schnappen(hi);
+  vorschau.style.top = (schnappen(lo)) + "px";
+  vorschau.style.height = Math.max(schnappen(hi) - schnappen(lo) - 2, 4) + "px";
+  vorschau.textContent = minZuUhrzeit(startMin) + "–" + minZuUhrzeit(endeMin);
 }
 
-function oeffneModal() {
-  const lo = Math.min(selStart, selEnde), hi = Math.max(selStart, selEnde);
-  document.getElementById('mRaum').textContent = `${aktuellerStandort} – ${selRaum}`;
-  document.getElementById('mZeit').textContent = `${fmtLabel(aktuellesDatum)}, ${lo}:00–${hi+1}:00`;
+let aktRaum = null, aktVon = null, aktBis = null;
+
+function oeffneModal(raum, lo, hi) {
+  const startMin = TAG_START + schnappen(lo);
+  const endeMin = TAG_START + schnappen(hi);
+  aktRaum = raum; aktVon = minZuUhrzeit(startMin); aktBis = minZuUhrzeit(endeMin);
+  document.getElementById('mRaum').textContent = `${aktuellerStandort} – ${raum}`;
+  document.getElementById('mZeit').textContent = `${fmtLabel(aktuellesDatum)}, ${aktVon}–${aktBis}`;
   document.getElementById('overlay').style.display = "flex";
 }
 
 document.getElementById('fCancel').onclick = () => { document.getElementById('overlay').style.display = "none"; render(); };
 document.getElementById('fSend').onclick = async () => {
   const name = document.getElementById('fName').value.trim();
-  const bereich = document.getElementById('fBereich').value.trim();
   if (!name) { document.getElementById('err').style.display = "block"; return; }
   document.getElementById('err').style.display = "none";
-  const lo = Math.min(selStart, selEnde), hi = Math.max(selStart, selEnde);
   const neu = {
-    id: "b_" + fmtDatum(aktuellesDatum) + "_" + selRaum.replace(/\s+/g,'') + "_" + Date.now(),
+    id: "b_" + fmtDatum(aktuellesDatum) + "_" + aktRaum.replace(/\s+/g,'') + "_" + Date.now(),
     standort: aktuellerStandort,
-    raum: selRaum,
+    raum: aktRaum,
     datum: fmtDatum(aktuellesDatum),
-    von: lo + ":00",
-    bis: (hi+1) + ":00",
+    von: aktVon,
+    bis: aktBis,
     status: "angefragt"
   };
   document.getElementById('fSend').textContent = "Sende…";
-  const ok = await speichereNeueBuchung(neu);
+  await speichereNeueBuchung(neu);
   document.getElementById('fSend').textContent = "Anfrage senden";
   document.getElementById('overlay').style.display = "none";
   document.getElementById('fName').value = ""; document.getElementById('fBereich').value = "";
-  selRaum = null;
   await ladeDaten();
 };
 
-document.getElementById('prevDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()-1); selRaum=null; render(); };
-document.getElementById('nextDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()+1); selRaum=null; render(); };
+document.getElementById('prevDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()-1); render(); };
+document.getElementById('nextDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()+1); render(); };
 
 initStandortSelect();
 ladeDaten();
