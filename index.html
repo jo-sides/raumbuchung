@@ -66,7 +66,9 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
     padding: 2px 4px; gap: 2px;
   }
-  .zeit-label { font-size: 14px; font-weight: 700; line-height: 1.1; }
+  .zeit-label { font-size: 13px; font-weight: 700; line-height: 1.15; }
+  .veranst-label { font-size: 13px; font-weight: 700; line-height: 1.15; }
+  .zeit-klein { font-size: 10.5px; font-weight: 500; opacity: 0.85; line-height: 1.1; }
   .status-badge { font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; padding: 1px 6px; border-radius: 20px; }
   .belegt { background: var(--markenrot); color: var(--markenweiss); }
   .belegt .status-badge { background: rgba(255,255,255,0.25); color: var(--markenweiss); }
@@ -302,9 +304,9 @@ function render() {
         const block = document.createElement('div');
         block.className = "block " + (istAngefragt ? "angefragt" : "belegt");
         block.style.top = (PADDING + (start - TAG_START) * PX_PRO_MIN) + "px";
-        block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 30) + "px";
-        block.innerHTML = `<span class="zeit-label">${b.von}–${b.bis}</span><span class="status-badge">${istAngefragt ? "Angefragt" : "Genehmigt"}</span>`;
-        block.title = `${b.von}–${b.bis} (${istAngefragt ? "Angefragt" : "Genehmigt"})` + (b.abteilung ? ` — ${b.abteilung}: ${b.veranstaltung || ''}` : '');
+        block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 40) + "px";
+        block.innerHTML = `<span class="veranst-label">${b.veranstaltung || '—'}</span><span class="zeit-klein">${b.von}–${b.bis}</span><span class="status-badge">${istAngefragt ? "Angefragt" : "Genehmigt"}</span>`;
+        block.title = `${b.veranstaltung || ''} (${b.von}–${b.bis}, ${istAngefragt ? "Angefragt" : "Genehmigt"})` + (b.abteilung ? ` — ${b.abteilung}` : '');
         spalte.appendChild(block);
       });
 
