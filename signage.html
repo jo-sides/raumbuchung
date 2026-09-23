@@ -13,30 +13,55 @@
   }
   * { font-family: 'Maven Johanniter', Tahoma, Arial, sans-serif; box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: transparent; color: var(--markenblau); height: 100%; overflow: hidden; }
-  body { padding: 3vh 3vw; display: flex; flex-direction: column; }
-  #kopfzeile { display: flex; gap: 3vw; padding: 0 2.5vw 1vh; font-size: 2vh; font-weight: 700; color: var(--markenblau-hell); text-transform: uppercase; letter-spacing: 0.5px; }
-  #kopfzeile .raum-kopf { min-width: 22vw; }
-  #inhalt { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-  #leer { color: #999; font-size: 3vh; text-align: center; margin-top: 18%; }
-  .kachel {
-    display: flex; align-items: center; gap: 2.5vw;
-    background: var(--grau); border-left: 1vh solid var(--markenrot);
-    border-radius: 1.2vh; padding: 2vh 2.5vw; margin-bottom: 2vh; flex-shrink: 0;
+  body { padding: 3vh 3vw; display: flex; flex-direction: column; position: relative; }
+
+  #schraege {
+    position: absolute; top: -6vh; right: -4vw; width: 16vw; height: 220%;
+    background: var(--markenrot); transform: rotate(21.26deg); opacity: 0.08; z-index: 0; pointer-events: none;
   }
-  .kachel.laeuft { background: #e3faf1; border-left-color: #17a877; }
-  .raum { font-size: 4vh; font-weight: 700; min-width: 22vw; color: var(--markenblau); }
-  .stock { font-size: 2.2vh; font-weight: 600; color: var(--markenblau-hell); display: block; margin-top: 0.3vh; }
-  .info { flex: 1; }
-  .titel { font-size: 2.8vh; font-weight: 700; color: var(--markenblau); }
-  .zeit { font-size: 2.3vh; font-weight: 500; color: var(--markenblau-hell); margin-top: 0.3vh; }
-  .badge { font-size: 1.8vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.6vh 1.8vh; border-radius: 20px; background: #17a877; color: #ffffff; flex-shrink: 0; }
-  #mehr { font-size: 2vh; color: var(--markenblau-hell); text-align: center; padding: 0.8vh; font-weight: 600; }
+
+  #kopfzeile { display: flex; align-items: center; gap: 3vw; padding: 0 2.8vw 1.4vh; position: relative; z-index: 1; }
+  #kopfzeile .linie { flex: 1; height: 0.35vh; background: linear-gradient(to right, var(--markenrot), transparent); border-radius: 4px; margin-left: 1vw; }
+  #kopfzeile span:first-child { font-size: 2vh; font-weight: 700; color: var(--markenblau); text-transform: uppercase; letter-spacing: 1px; min-width: 20vw; }
+  #kopfzeile .veranst-kopf { font-size: 2vh; font-weight: 700; color: var(--markenblau); text-transform: uppercase; letter-spacing: 1px; }
+
+  #inhalt { flex: 1; overflow: hidden; display: flex; flex-direction: column; position: relative; z-index: 1; }
+  #leer { color: #b8bccb; font-size: 2.6vh; font-weight: 600; text-align: center; margin-top: 20%; }
+
+  .kachel {
+    display: flex; align-items: center; gap: 2.2vw;
+    background: #ffffff; border: 1px solid #ececf3;
+    box-shadow: 0 0.6vh 1.6vh rgba(0,5,72,0.09);
+    border-radius: 1.8vh; padding: 1.8vh 2.4vw; margin-bottom: 1.8vh; flex-shrink: 0;
+  }
+  .kachel.laeuft { box-shadow: 0 0.6vh 1.8vh rgba(23,168,119,0.22); border-color: #b7ecd8; }
+
+  .chip {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-width: 12vw; height: 8.5vh; border-radius: 1.4vh; flex-shrink: 0;
+    background: linear-gradient(155deg, var(--markenrot), #c40033);
+  }
+  .kachel.laeuft .chip { background: linear-gradient(155deg, #1dbf82, #128a5c); }
+  .chip .raum { font-size: 3.2vh; font-weight: 700; color: #ffffff; line-height: 1; }
+  .chip .stock { font-size: 1.7vh; font-weight: 600; color: rgba(255,255,255,0.85); margin-top: 0.6vh; }
+
+  .info { flex: 1; min-width: 0; }
+  .titel { font-size: 2.9vh; font-weight: 700; color: var(--markenblau); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .zeit { font-size: 2.1vh; font-weight: 600; color: var(--markenblau-hell); margin-top: 0.4vh; }
+
+  .badge { display: flex; align-items: center; gap: 0.8vh; font-size: 1.7vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.7vh 1.6vh; border-radius: 20px; background: #e3faf1; color: #128a5c; flex-shrink: 0; }
+  .badge .punkt { width: 1.1vh; height: 1.1vh; border-radius: 50%; background: #17a877; animation: puls 1.4s ease-in-out infinite; }
+  @keyframes puls { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+
+  #mehr { font-size: 1.9vh; color: var(--markenblau-hell); text-align: center; padding: 1vh; font-weight: 600; }
 </style>
 </head>
 <body>
+  <div id="schraege"></div>
   <div id="kopfzeile">
-    <span class="raum-kopf">Raum</span>
-    <span>Veranstaltung</span>
+    <span>Raum</span>
+    <span class="veranst-kopf">Veranstaltung</span>
+    <div class="linie"></div>
   </div>
   <div id="inhalt"></div>
 
@@ -80,12 +105,15 @@ async function laden() {
       const laeuft = minVon(t.von) <= jetzt && jetzt < minVon(t.bis);
       return `
         <div class="kachel ${laeuft ? 'laeuft' : ''}">
-          <div class="raum">${t.kuerzel}<span class="stock">${t.pfeil} ${t.stock}</span></div>
+          <div class="chip">
+            <span class="raum">${t.kuerzel}</span>
+            <span class="stock">${t.pfeil} ${t.stock}</span>
+          </div>
           <div class="info">
             <div class="titel">${t.titel}</div>
             <div class="zeit">${t.von} – ${t.bis} Uhr</div>
           </div>
-          ${laeuft ? '<span class="badge">Läuft</span>' : ''}
+          ${laeuft ? '<span class="badge"><span class="punkt"></span>Läuft</span>' : ''}
         </div>`;
     }).join('') + (rest > 0 ? `<div id="mehr">+ ${rest} weitere${rest === 1 ? 'r' : ''} Termin${rest === 1 ? '' : 'e'} heute</div>` : '');
   } catch (e) {
