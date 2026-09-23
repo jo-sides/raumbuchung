@@ -114,10 +114,10 @@
     "datum": "2026-09-23",
     "von": "20:00",
     "bis": "23:00",
-    "status": "angefragt",
+    "status": "genehmigt",
     "abteilung": "Rettungsdienstschule",
-    "veranstaltung": "TEST3",
-    "teilnehmer": null,
+    "veranstaltung": "Erste-Hilfe-Kurs",
+    "teilnehmer": 15,
     "bemerkung": ""
   }
 ]
