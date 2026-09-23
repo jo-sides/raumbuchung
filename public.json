@@ -1,0 +1,47 @@
+[
+  {
+    "id": "b_2026-03-05_sem1_001",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 1",
+    "datum": "2026-03-05",
+    "von": "08:30",
+    "bis": "15:30",
+    "status": "gebucht"
+  },
+  {
+    "id": "b_2026-03-05_werk_001",
+    "standort": "Viernheim",
+    "raum": "Werkstraße",
+    "datum": "2026-03-05",
+    "von": "08:30",
+    "bis": "13:00",
+    "status": "gebucht"
+  },
+  {
+    "id": "b_2026-03-12_sem2_001",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 2",
+    "datum": "2026-03-12",
+    "von": "18:00",
+    "bis": "20:00",
+    "status": "gebucht"
+  },
+  {
+    "id": "b_2026-03-16_lu1_001",
+    "standort": "Ludwigshafen-Ruchheim",
+    "raum": "Seminarraum 1",
+    "datum": "2026-03-16",
+    "von": "10:00",
+    "bis": "12:30",
+    "status": "gebucht"
+  },
+  {
+    "id": "b_2026-03-18_speyer_001",
+    "standort": "Speyer",
+    "raum": "Seminarraum",
+    "datum": "2026-03-18",
+    "von": "09:00",
+    "bis": "16:45",
+    "status": "gebucht"
+  }
+]
