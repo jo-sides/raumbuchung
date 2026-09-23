@@ -168,6 +168,7 @@
     </div>
   </div>
 
+  <div id="loeschUI"></div>
 <script>
 const OWNER = "jo-sides";
 const REPO = "raumbuchung";
@@ -313,7 +314,9 @@ function render() {
         block.style.top = (PADDING + (start - TAG_START) * PX_PRO_MIN) + "px";
         block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 40) + "px";
         block.innerHTML = `<span class="veranst-label">${b.veranstaltung || '—'}</span><span class="zeit-klein">${b.von}–${b.bis}</span><span class="status-badge">${istAngefragt ? "Angefragt" : "Genehmigt"}</span>`;
-        block.title = `${b.veranstaltung || ''} (${b.von}–${b.bis}, ${istAngefragt ? "Angefragt" : "Genehmigt"})` + (b.abteilung ? ` — ${b.abteilung}` : '');
+        block.title = `${b.veranstaltung || ''} (${b.von}–${b.bis}, ${istAngefragt ? "Angefragt" : "Genehmigt"})` + (b.abteilung ? ` — ${b.abteilung}` : '') + (b.loeschungAngefordert ? ' — Löschung angefordert' : '');
+        if (b.loeschungAngefordert) block.style.opacity = "0.55";
+        block.addEventListener('click', (e) => { e.stopPropagation(); oeffneLoeschAnfrage(b); });
         spalte.appendChild(block);
       });
 
@@ -378,6 +381,40 @@ function oeffneModal(raum, lo, hi) {
   document.getElementById('mRaum').textContent = `${aktuellerStandort} – ${raum}`;
   document.getElementById('mZeit').textContent = `${fmtLabel(aktuellesDatum)}, ${aktVon}–${aktBis}`;
   document.getElementById('overlay').style.display = "flex";
+}
+
+function oeffneLoeschAnfrage(buchung) {
+  const bereitsAngefordert = !!buchung.loeschungAngefordert;
+  const html = `
+    <div id="loeschOverlay" style="display:flex; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,5,72,0.55); align-items:center; justify-content:center; z-index:10;">
+      <div style="background:var(--markenweiss); border-radius:14px; padding:22px; width:300px; box-shadow:0 10px 30px rgba(0,5,72,0.3);">
+        <div style="font-weight:700; font-size:16px; color:var(--markenblau); margin-bottom:2px;">${buchung.standort} – ${buchung.raum}</div>
+        <div style="font-size:12.5px; color:var(--markenblau-hell); margin-bottom:14px;">${buchung.datum}, ${buchung.von}–${buchung.bis}</div>
+        ${bereitsAngefordert
+          ? '<div style="font-size:14px; color:var(--markenblau); margin-bottom:16px;">Für diesen Termin wurde bereits eine Löschung angefordert — die Bearbeitung erfolgt intern.</div>'
+          : '<div style="font-size:14px; color:var(--markenblau); margin-bottom:16px;">Löschung dieses Termins anfordern? Die tatsächliche Löschung erfolgt nach interner Prüfung.</div>'}
+        <div class="row">
+          <button id="loeschAbbrechen">Schließen</button>
+          ${bereitsAngefordert ? '' : '<button id="loeschAnfordernBtn" style="background:var(--markenrot); border-color:var(--markenrot); color:var(--markenweiss);">Löschung anfordern</button>'}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('loeschUI').innerHTML = html;
+  document.getElementById('loeschAbbrechen').onclick = () => { document.getElementById('loeschUI').innerHTML = ""; };
+  if (!bereitsAngefordert) {
+    document.getElementById('loeschAnfordernBtn').onclick = async () => {
+      document.getElementById('loeschAnfordernBtn').textContent = "Sende…";
+      const res = await fetch(API, { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" } });
+      const json = await res.json();
+      let liste = JSON.parse(b64DecodeUnicode(json.content));
+      liste = liste.map(b => b.id === buchung.id ? { ...b, loeschungAngefordert: true } : b);
+      const contentB64 = b64EncodeUnicode(JSON.stringify(liste, null, 2));
+      await fetch(API, { method: "PUT", headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" }, body: JSON.stringify({ message: `Löschung angefordert: ${buchung.id}`, content: contentB64, sha: json.sha }) });
+      document.getElementById('loeschUI').innerHTML = "";
+      await ladeDaten();
+    };
+  }
 }
 
 document.getElementById('fCancel').onclick = () => {
