@@ -84,13 +84,17 @@ async function laden() {
         </div>`;
     }).join('');
 
-    // Keine halb abgeschnittenen Kacheln: alles entfernen, was über die verfügbare Höhe hinausragt
-    const kacheln = Array.from(inhalt.children);
-    for (let i = kacheln.length - 1; i >= 0; i--) {
-      if (kacheln[i].offsetTop + kacheln[i].offsetHeight > inhalt.clientHeight) {
-        kacheln[i].remove();
-      } else {
-        break;
+    // Keine halb abgeschnittenen Kacheln: alles entfernen, was über die verfügbare Höhe hinausragt —
+    // aber niemals die erste/einzige Kachel, und nur wenn die Höhe plausibel ermittelt werden konnte
+    // (bei 0/sehr klein hat die Umgebung z.B. noch nicht fertig geladen — dann lieber nichts abschneiden).
+    if (inhalt.clientHeight > 80) {
+      const kacheln = Array.from(inhalt.children);
+      for (let i = kacheln.length - 1; i > 0; i--) {
+        if (kacheln[i].offsetTop + kacheln[i].offsetHeight > inhalt.clientHeight) {
+          kacheln[i].remove();
+        } else {
+          break;
+        }
       }
     }
   } catch (e) {
