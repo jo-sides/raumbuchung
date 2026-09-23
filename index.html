@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raumbuchung Johanniter Bergstraße-Pfalz</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f2; margin: 0; padding: 24px; color: #1a1a1a; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  p.sub { color: #555; margin-top: 0; margin-bottom: 20px; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+  th { background: #c1121f; color: #fff; font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  .status { color: #b3261e; font-weight: 500; }
+  #status { font-size: 13px; color: #888; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+  <h1>Raumbelegung Johanniter Bergstraße-Pfalz</h1>
+  <p class="sub">Testansicht — zeigt live die Buchungen aus dem GitHub-Repo</p>
+  <div id="status">Lade Daten…</div>
+  <table id="tabelle" style="display:none">
+    <thead>
+      <tr><th>Standort</th><th>Raum</th><th>Datum</th><th>Von</th><th>Bis</th><th>Status</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+<script>
+const DATA_URL = "https://raw.githubusercontent.com/jo-sides/raumbuchung/main/public.json";
+
+async function ladeDaten() {
+  const statusEl = document.getElementById('status');
+  try {
+    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const daten = await res.json();
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = "";
+    daten
+      .sort((a, b) => (a.datum + a.von).localeCompare(b.datum + b.von))
+      .forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${b.standort}</td>
+          <td>${b.raum}</td>
+          <td>${b.datum}</td>
+          <td>${b.von}</td>
+          <td>${b.bis}</td>
+          <td class="status">${b.status}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    statusEl.textContent = daten.length + " Buchungen geladen — Stand: " + new Date().toLocaleTimeString('de-DE');
+    document.getElementById('tabelle').style.display = "table";
+  } catch (err) {
+    statusEl.textContent = "Fehler beim Laden: " + err.message;
+  }
+}
+
+ladeDaten();
+</script>
+</body>
+</html>
