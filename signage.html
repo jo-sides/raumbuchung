@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wegweiser</title>
+<style>
+  :root {
+    --markenrot: #EB003C;
+    --markenblau: #000548;
+    --markenblau-hell: #6084bf;
+    --grau: #f0f0f0;
+  }
+  * { font-family: 'Maven Johanniter', Tahoma, Arial, sans-serif; box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ffffff; color: var(--markenblau); height: 100%; overflow: hidden; }
+  body { padding: 28px 32px; }
+  #leer { color: #999; font-size: 22px; text-align: center; margin-top: 18%; }
+  .kachel {
+    display: flex; align-items: center; gap: 20px;
+    background: var(--grau); border-left: 8px solid var(--markenrot);
+    border-radius: 10px; padding: 18px 22px; margin-bottom: 16px;
+  }
+  .kachel.laeuft { border-left-color: #53cfad; }
+  .raum { font-size: 30px; font-weight: 700; min-width: 190px; color: var(--markenblau); }
+  .stock { font-size: 15px; font-weight: 500; color: var(--markenblau-hell); display: block; margin-top: 2px; }
+  .info { flex: 1; }
+  .titel { font-size: 22px; font-weight: 700; color: var(--markenblau); }
+  .zeit { font-size: 18px; font-weight: 500; color: var(--markenblau-hell); margin-top: 2px; }
+  .badge { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 20px; background: #53cfad; color: #03362a; }
+</style>
+</head>
+<body>
+  <div id="inhalt"></div>
+
+<script>
+const SIGNAGE_URL = "https://raw.githubusercontent.com/jo-sides/raumbuchung/main/signage.json";
+
+function heuteDatum() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
+}
+function minJetzt() {
+  const d = new Date();
+  return d.getHours()*60 + d.getMinutes();
+}
+function minVon(uhrzeit) {
+  const [h,m] = uhrzeit.split(':').map(Number);
+  return h*60+m;
+}
+
+async function laden() {
+  try {
+    const res = await fetch(SIGNAGE_URL + "?t=" + Date.now());
+    const alle = await res.json();
+    const heute = heuteDatum();
+    const jetzt = minJetzt();
+    const termine = alle
+      .filter(t => t.datum === heute && minVon(t.bis) > jetzt)
+      .sort((a,b) => minVon(a.von) - minVon(b.von));
+
+    const inhalt = document.getElementById('inhalt');
+    if (termine.length === 0) {
+      inhalt.innerHTML = '<div id="leer">Keine bevorstehenden Termine geplant</div>';
+      return;
+    }
+    inhalt.innerHTML = termine.map(t => {
+      const laeuft = minVon(t.von) <= jetzt && jetzt < minVon(t.bis);
+      return `
+        <div class="kachel ${laeuft ? 'laeuft' : ''}">
+          <div class="raum">${t.kuerzel} ${t.pfeil}<span class="stock">${t.stock}</span></div>
+          <div class="info">
+            <div class="titel">${t.titel}</div>
+            <div class="zeit">${t.von} – ${t.bis} Uhr</div>
+          </div>
+          ${laeuft ? '<span class="badge">Läuft</span>' : ''}
+        </div>`;
+    }).join('');
+  } catch (e) {
+    document.getElementById('inhalt').innerHTML = '<div id="leer">Keine bevorstehenden Termine geplant</div>';
+  }
+}
+
+laden();
+setInterval(laden, 60000);
+</script>
+</body>
+</html>
