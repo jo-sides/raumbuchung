@@ -20,7 +20,10 @@
   .zeitachseKoerper { position: relative; }
   .zeitachse .marke { position: absolute; left: 0; right: 0; font-size: 10px; color: #999; transform: translateY(-50%); text-align: right; padding-right: 4px; box-sizing: border-box; }
   .spalten { flex: 1; display: flex; }
-  .raumKopf { text-align: center; font-weight: bold; font-size: 12px; padding: 9px 4px; box-sizing: border-box; height: 33px; border-bottom: 1px solid #ddd; border-left: 1px solid #eee; background: #f8f6f4; }
+  .raumKopf { text-align: center; font-weight: bold; font-size: 12px; padding: 9px 4px; box-sizing: border-box; height: 33px; border-bottom: 1px solid #ddd; border-left: 1px solid #eee; background: #f8f6f4; position: relative; }
+  .infoIcon { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #ccc; color: #fff; font-size: 10px; line-height: 14px; text-align: center; margin-left: 4px; cursor: pointer; font-weight: normal; }
+  .infoBox { display: none; position: absolute; top: 32px; left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 10px; font-size: 11px; font-weight: normal; text-align: left; width: 180px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 5; color: #333; }
+  .infoBox.offen { display: block; }
   .raumSpalte { flex: 1; position: relative; border-left: 1px solid #eee; background-image: repeating-linear-gradient(to bottom, transparent, transparent 59px, #f0f0ee 59px, #f0f0ee 60px); cursor: crosshair; }
   .kopfZeile { display: flex; }
   .kopfZeile .raumKopf { flex: 1; }
@@ -90,6 +93,10 @@ const RAEUME = {
   "Frankenthal": ["Seminarraum"]
 };
 
+const RAUM_HINWEISE = {
+  "Viernheim|Seminarraum 5": "Max. 18 Personen (Brandschutz, Obergeschoss)"
+};
+
 const TAG_START = 7 * 60;   // 07:00 in Minuten
 const TAG_ENDE = 20 * 60;   // 20:00 in Minuten
 const PX_PRO_MIN = 1;       // 1 Minute = 1 Pixel -> 780px hoch
@@ -97,7 +104,7 @@ const RASTER = 15;          // Minuten-Raster
 const HOEHE = (TAG_ENDE - TAG_START) * PX_PRO_MIN;
 
 let aktuellerStandort = "Viernheim";
-let aktuellesDatum = new Date(2026, 2, 5);
+let aktuellesDatum = new Date();
 let buchungen = [];
 let ziehend = false, ziehRaum = null, ziehStartY = 0, ziehAktY = 0;
 
@@ -107,7 +114,7 @@ function fmtDatum(d) {
   const t = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${t}`;
 }
-function fmtLabel(d) { return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long' }); }
+function fmtLabel(d) { return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long', year: 'numeric' }); }
 function minZuUhrzeit(min) {
   const h = Math.floor(min / 60), m = min % 60;
   return String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
@@ -182,7 +189,17 @@ function render() {
   raeume.forEach(r => {
     const d = document.createElement('div');
     d.className = "raumKopf";
-    d.textContent = r;
+    const hinweis = RAUM_HINWEISE[aktuellerStandort + "|" + r];
+    d.innerHTML = r + (hinweis ? ` <span class="infoIcon">i</span><div class="infoBox">${hinweis}</div>` : "");
+    if (hinweis) {
+      const icon = d.querySelector('.infoIcon');
+      const box = d.querySelector('.infoBox');
+      icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.infoBox.offen').forEach(b => { if (b !== box) b.classList.remove('offen'); });
+        box.classList.toggle('offen');
+      });
+    }
     kopf.appendChild(d);
   });
 
@@ -296,6 +313,9 @@ document.getElementById('nextDay').onclick = () => { aktuellesDatum.setDate(aktu
 
 initStandortSelect();
 ladeDaten();
+document.addEventListener('click', () => {
+  document.querySelectorAll('.infoBox.offen').forEach(b => b.classList.remove('offen'));
+});
 </script>
 </body>
 </html>
