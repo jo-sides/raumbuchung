@@ -5,69 +5,132 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Raumbuchung Johanniter Bergstraße-Pfalz</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f4f4f2; margin: 0; padding: 20px; color: #1a1a1a; }
-  h1 { font-size: 19px; margin: 0 0 2px; }
-  p.sub { color: #555; margin: 0 0 16px; font-size: 13px; }
-  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-  select, button { font-size: 14px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
-  button { cursor: pointer; }
-  #dayLabel { font-weight: bold; min-width: 160px; text-align: center; }
-  #status { font-size: 12px; color: #888; margin-bottom: 10px; }
+  :root {
+    --markenrot: #EB003C;
+    --markenrot-hover: #c40033;
+    --markenblau: #000548;
+    --markenblau-hell: #6084bf;
+    --markenweiss: #ffffff;
+    --grau: #f0f0f0;
+    --signalgelb: #DEFF00;
+    --orange: #f4b00a;
+    --orange-hell: #fae5c8;
+  }
+  * { font-family: 'Maven Johanniter', Tahoma, Arial, sans-serif; }
+  body { margin: 0; background: var(--markenweiss); color: var(--markenblau); }
 
-  #kalender { display: flex; background: #fff; border: 1px solid #ddd; border-radius: 6px; overflow: visible; }
-  .zeitachse { width: 46px; flex-shrink: 0; border-right: 1px solid #ddd; }
-  .zeitachseKopf { height: 33px; box-sizing: border-box; border-bottom: 1px solid #ddd; }
+  header { position: relative; background: var(--markenblau); overflow: hidden; padding: 18px 24px; display: flex; align-items: center; gap: 16px; }
+  header::after {
+    content: ""; position: absolute; top: -40%; right: -6%; width: 220px; height: 220%;
+    background: var(--markenrot); transform: rotate(21.26deg); opacity: 0.9;
+  }
+  header img { height: 34px; position: relative; z-index: 1; }
+  header h1 { font-size: 22px; font-weight: 700; color: var(--markenweiss); margin: 0; position: relative; z-index: 1; letter-spacing: 0.2px; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 22px 24px 40px; }
+  p.sub { color: var(--markenblau-hell); margin: 0 0 18px; font-size: 14px; }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  select, button.nav {
+    font-size: 14px; padding: 9px 14px; border: 1.5px solid var(--markenblau); border-radius: 8px;
+    background: var(--markenweiss); color: var(--markenblau); font-weight: 500; cursor: pointer;
+  }
+  button.nav:hover { background: var(--markenblau); color: var(--markenweiss); }
+  #dayLabel { font-weight: 700; min-width: 190px; text-align: center; font-size: 15px; }
+  #status { font-size: 12px; color: var(--markenblau-hell); margin-bottom: 12px; }
+
+  .legende { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; font-size: 12px; color: var(--markenblau); }
+  .legende .punkt { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  #kalender { display: flex; background: var(--markenweiss); border: 1.5px solid var(--grau); border-radius: 12px; overflow: visible; box-shadow: 0 2px 10px rgba(0,5,72,0.06); }
+  .zeitachse { width: 50px; flex-shrink: 0; border-right: 1.5px solid var(--grau); }
+  .zeitachseKopf { height: 38px; box-sizing: border-box; border-bottom: 1.5px solid var(--grau); border-radius: 12px 0 0 0; }
   .zeitachseKoerper { position: relative; }
-  .zeitachse .marke { position: absolute; left: 0; right: 0; font-size: 10px; color: #999; transform: translateY(-50%); text-align: right; padding-right: 4px; box-sizing: border-box; }
+  .zeitachse .marke { position: absolute; left: 0; right: 0; font-size: 10.5px; color: var(--markenblau-hell); transform: translateY(-50%); text-align: right; padding-right: 6px; box-sizing: border-box; font-weight: 500; }
   .spalten { flex: 1; display: flex; }
-  .raumKopf { text-align: center; font-weight: bold; font-size: 12px; padding: 9px 4px; box-sizing: border-box; height: 33px; border-bottom: 1px solid #ddd; border-left: 1px solid #eee; background: #f8f6f4; position: relative; }
-  .infoIcon { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #ccc; color: #fff; font-size: 10px; line-height: 14px; text-align: center; margin-left: 4px; cursor: pointer; font-weight: normal; }
-  .infoBox { display: none; position: absolute; top: 32px; left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 10px; font-size: 11px; font-weight: normal; text-align: left; width: 180px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 5; color: #333; }
+  .raumKopf {
+    text-align: center; font-weight: 700; font-size: 12.5px; padding: 10px 4px; box-sizing: border-box;
+    height: 38px; border-bottom: 1.5px solid var(--grau); border-left: 1px solid var(--grau);
+    background: var(--grau); color: var(--markenblau); position: relative;
+  }
+  .infoIcon { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--markenblau-hell); color: #fff; font-size: 10px; line-height: 14px; text-align: center; margin-left: 4px; cursor: pointer; font-weight: normal; }
+  .infoBox { display: none; position: absolute; top: 36px; left: 50%; transform: translateX(-50%); background: var(--markenweiss); border: 1px solid var(--grau); border-radius: 8px; padding: 9px 11px; font-size: 11px; font-weight: normal; text-align: left; width: 180px; box-shadow: 0 4px 12px rgba(0,5,72,0.15); z-index: 5; color: var(--markenblau); }
   .infoBox.offen { display: block; }
-  .raumSpalte { flex: 1; position: relative; border-left: 1px solid #eee; background-image: repeating-linear-gradient(to bottom, transparent, transparent 59px, #f0f0ee 59px, #f0f0ee 60px); cursor: crosshair; }
+  .raumSpalte { flex: 1; position: relative; border-left: 1px solid var(--grau); background-image: repeating-linear-gradient(to bottom, transparent, transparent 59px, #f7f7f7 59px, #f7f7f7 60px); cursor: crosshair; }
   .kopfZeile { display: flex; }
   .kopfZeile .raumKopf { flex: 1; }
+  .kopfZeile .raumKopf:last-child { border-radius: 0 12px 0 0; }
 
-  .block { position: absolute; left: 2px; right: 2px; border-radius: 4px; font-size: 11px; padding: 3px 5px; box-sizing: border-box; overflow: hidden; }
-  .belegt { background: #c1121f; color: #fff; }
-  .angefragt { background: #f9a825; color: #3a2a00; }
-  .neu { background: #ffb199; border: 1px dashed #c1121f; color: #5a1200; pointer-events: none; }
+  .block {
+    position: absolute; left: 3px; right: 3px; border-radius: 8px; box-sizing: border-box; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: 2px 4px; gap: 2px;
+  }
+  .zeit-label { font-size: 14px; font-weight: 700; line-height: 1.1; }
+  .status-badge { font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; padding: 1px 6px; border-radius: 20px; }
+  .belegt { background: var(--markenrot); color: var(--markenweiss); }
+  .belegt .status-badge { background: rgba(255,255,255,0.25); color: var(--markenweiss); }
+  .angefragt { background: var(--orange-hell); color: #7a4a00; border: 1.5px solid var(--orange); }
+  .angefragt .status-badge { background: var(--orange); color: #4a2d00; }
+  .neu { background: var(--signalgelb); border: 1.5px dashed var(--markenrot); color: var(--markenblau); pointer-events: none; }
+  .neu .zeit-label { font-size: 13px; }
 
-  #overlay { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 10; }
-  #modal { background: #fff; border-radius: 10px; padding: 20px; width: 300px; }
-  #modal input { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-  #modal .row { display: flex; gap: 8px; }
-  #modal button { flex: 1; }
-  #err { color: #b3261e; font-size: 12px; display: none; margin-bottom: 8px; }
+  #overlay { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,5,72,0.55); align-items: center; justify-content: center; z-index: 10; }
+  #modal { background: var(--markenweiss); border-radius: 14px; padding: 22px; width: 320px; box-shadow: 0 10px 30px rgba(0,5,72,0.3); }
+  #modal #mRaum { font-weight: 700; font-size: 16px; color: var(--markenblau); margin-bottom: 2px; }
+  #modal #mZeit { font-size: 12.5px; color: var(--markenblau-hell); margin-bottom: 14px; }
+  #modal select, #modal input, #modal textarea {
+    width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 9px 10px; border: 1.5px solid var(--grau);
+    border-radius: 8px; font-size: 14px; color: var(--markenblau); font-family: inherit;
+  }
+  #modal select:focus, #modal input:focus, #modal textarea:focus { outline: none; border-color: var(--markenblau-hell); }
+  #modal .row { display: flex; gap: 10px; margin-top: 4px; }
+  #modal button { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1.5px solid var(--markenblau); background: var(--markenweiss); color: var(--markenblau); }
+  #modal button:hover { background: var(--markenblau); color: var(--markenweiss); }
+  #fSend { background: var(--markenrot) !important; border-color: var(--markenrot) !important; color: var(--markenweiss) !important; }
+  #fSend:hover { background: var(--markenrot-hover) !important; border-color: var(--markenrot-hover) !important; }
+  #err { color: var(--markenrot); font-size: 12px; display: none; margin-bottom: 8px; }
 </style>
 </head>
 <body>
-  <h1>Raumbelegung Johanniter Bergstraße-Pfalz</h1>
-  <p class="sub">Auf einen freien Bereich klicken und ziehen, um eine Raumanfrage zu stellen — 15-Minuten-genau.</p>
+  <header>
+    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgdmVyc2lvbj0iMS4xIgogICBpZD0ibGF5ZXIiCiAgIHg9IjBweCIKICAgeT0iMHB4IgogICB4bWw6c3BhY2U9InByZXNlcnZlIgogICB2aWV3Qm94PSIyMS40IDI1NC4zIDE3OTkuMDg2IDM5OC40MDAwMSIKICAgd2lkdGg9IjE3OTkuMDg2MSIKICAgaGVpZ2h0PSIzOTguMzk5OTkiCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iPjxkZWZzCiAgIGlkPSJkZWZzNzAyOCIgLz4KPHN0eWxlCiAgIHR5cGU9InRleHQvY3NzIgogICBpZD0ic3R5bGU3MDEzIj4KCS5zdDB7ZmlsbDojRkZGRkZGO30KCS5zdDF7ZmlsbDojRUIwMDNDO30KPC9zdHlsZT4KPHRpdGxlCiAgIGlkPSJ0aXRsZTcwMTUiPkhBVENIIDIwMjAgTE9HTzwvdGl0bGU+Cgo8cGF0aAogICBjbGFzcz0ic3QxIgogICBkPSJtIDUyNC43ODYxMSw1MjYuMjgyNyB2IC0zMi4xIGMgNi4zLDMuOSAxMC41LDcuMiAxNC40LDguNyAzLjksMS41IDguMSwyLjQgMTIsMi40IDEzLjUsMCAyMS42LC03LjIgMjEuNiwtMjEuNiB2IC0xMDggaCAzNi45IHYgMTEwLjQgYyAwLDE3LjcgLTQuOCwyOS43IC0xNC40LDM2LjkgLTkuNiw3LjIgLTIwLjcsMTEuMSAtMzQuNSwxMS4xIC0xMi42LDAuOSAtMjMuNywtMi4xIC0zNiwtNy44IG0gMTA2LjUsLTcyLjkgYyAwLC01Ni4xIDI1LjUsLTgxIDY5LC04MSA0Ny4xLDAgNjkuNiwyNi40IDY5LjYsODEgMCw1OC41IC0yNi40LDgxIC02OSw4MSAtNDUuMywwLjYgLTY5LjYsLTI0LjkgLTY5LjYsLTgxIG0gMTAwLjIsMCBjIDAsLTM2LjkgLTkuNiwtNTEuOSAtMzEuMiwtNTEuOSAtMjAuMSwwIC0zMC4zLDE1LjkgLTMwLjMsNTEuOSAwLDM2IDExLjEsNTEuOSAzMi4xLDUxLjkgMTguOSwwIDI5LjQsLTE1IDI5LjQsLTUxLjkgbSA2MCwtNzcuNyBoIDM2LjkgdiA2My4zIGggNDguOSB2IC02My4zIGggMzYuOSB2IDE1NiBoIC0zNi45IHYgLTYyLjQgaCAtNDguOSB2IDYxLjggaCAtMzYuOSB6IG0gMjc1LjM5OTk5LDE1Ni4zIC00OC45LC0xNTYgaCAtMzguMzk5OTkgbCAtNTAuNCwxNTYgaCAzMy42IGwgOC43LC0zMC4zIGggNDkuNzk5OTkgbCA4LjcsMzAuMyB6IG0gLTUzLjQsLTU4LjUgaCAtMzMuNTk5OTkgbCAxNi44LC01NyB6IG0gMzQxLjEsLTk3LjggdiAxNTYgaCAtMzAuMyBsIC01NS4yLC05NS40IHYgOTUuNCBoIC0zNi45IHYgLTE1NiBoIDMzLjYgbCA1MS4zLDkzIHYgLTkzIHogbSAtMTUwLjYsMCB2IDE1NiBoIC0zMC4zIGwgLTU1LjIsLTk1LjQgdiA5NS40IGggLTM3LjIgdiAtMTU2IGggMzMuNiBsIDUxLjMsOTMgdiAtOTMgeiBtIDE3OS40LDAgaCAzNi45IHYgMTU2IGggLTM2LjkgeiBtIDk2LDI3LjMgaCAtNDEuNyB2IC0yNy4zIGggMTIwIHYgMjcuMyBoIC00Mi4zIHYgMTI5IGggLTM2LjkgdiAtMTI5IHogbSAzMDUuMSw2Ni4zIGMgOS42LC0zLjMgMTcuNywtOC4xIDIzLjEsLTE2LjggNS43LC04LjcgOC4xLC0xNy43IDguMSwtMjcuOSAwLC0xNS45IC00LjgsLTI4LjggLTE1LjMsLTM2LjkgLTkuNiwtOC4xIC0yNCwtMTIuOSAtNDIuMywtMTIuOSBoIC02My4zIHYgMTU2IGggMzYgdiAtNTcuNiBoIDE1LjkgbCAyOS43LDU3LjYgaCA0NC4xIHogbSAtMjcuMywtMjMuMSBoIC0yNC45IHYgLTQzLjIgaCAyNi40IGMgNS43LDAgMTEuMSwxLjUgMTUuMyw0LjggMy4zLDMuMyA0LjgsOS42IDQuOCwxNS45IDAuOSwxNC40IC03LjIsMjIuNSAtMjEuNiwyMi41IG0gLTE4MC45LDg1LjggaCA5MyB2IC0yNy4zIGggLTU2LjEgdiAtMzYuOSBoIDQ3LjEgdiAtMjcuOSBoIC00Ny4xIHYgLTM2LjkgaCA1Ni4xIHYgLTI3LjMgaCAtOTMgeiIKICAgaWQ9InBhdGg3MDE5IgogICBzdHlsZT0ic3Ryb2tlLXdpZHRoOjMiIC8+CgoKPHBhdGgKICAgY2xhc3M9InN0MCIKICAgZD0ibSA0MjIuMTkwMzcsNDUzLjUgYyAwLDEwOC4zNjQ4IC04OS4yNDE2LDE5Ni44MDk2IC0xOTkuMTk5OTcsMTk2LjgwOTYgLTEwOS45NTg0LDAgLTE5OS4yLC04OC40NDQ4IC0xOTkuMiwtMTk2LjgwOTYgMCwtMTA4LjM2NDggODkuMjQxNiwtMTk2LjgwOTYgMTk5LjIsLTE5Ni44MDk2IDEwOS45NTgzNywwIDE5OS4xOTk5Nyw4OC40NDQ4IDE5OS4xOTk5NywxOTYuODA5NiIKICAgaWQ9InBhdGg0IgogICBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojZmZmZmZmO3N0cm9rZS13aWR0aDo3Ljk2OCIgLz48cGF0aAogICBjbGFzcz0ic3QxIgogICBkPSJNIDIyMi45OTA0LDU5OC41MTc2IEMgMTQyLjUxMzYsNTk4LjUxNzYgNzYuMzc5Miw1MzMuMTggNzYuMzc5Miw0NTMuNSBjIDAsLTc5LjY4IDY2LjEzNDQsLTE0NS4wMTc2IDE0Ni42MTEyLC0xNDUuMDE3NiA4MC40NzY3NywwIDE0Ni42MTExNyw2NS4zMzc2IDE0Ni42MTExNywxNDUuMDE3NiAwLDc5LjY4IC02Ni4xMzQ0LDE0NS4wMTc2IC0xNDYuNjExMTcsMTQ1LjAxNzYiCiAgIGlkPSJwYXRoNiIKICAgc3R5bGU9ImZpbGw6I2ViMDAzYztzdHJva2Utd2lkdGg6Ny45NjgiIC8+PHBhdGgKICAgY2xhc3M9InN0MCIKICAgZD0iTSAyMjIuOTkwNCw0NTMuNSAxMDIuNjczNiw0MDcuMjg1NiAxNDguMDkxMiw0NTMuNSAxMDIuNjczNiw0OTkuNzE0NCBaIG0gMCwwIDEyMC4zMTY3Nyw0Ni4yMTQ0IC00NS40MTc2LC00Ni4yMTQ0IDQ1LjQxNzYsLTQ2LjIxNDQgeiBtIDAsMCAtNDcuMDExMiwxMTkuNTIgNDcuMDExMiwtNDQuNjIwOCA0Ny4wMTExNyw0NC42MjA4IHogbSAwLDAgNDcuMDExMTcsLTExOS41MiAtNDcuMDExMTcsNDQuNjIwOCAtNDcuMDExMiwtNDQuNjIwOCB6IgogICBpZD0icGF0aDgiCiAgIHN0eWxlPSJmaWxsOiNmZmZmZmY7c3Ryb2tlLXdpZHRoOjcuOTY4IiAvPjxwYXRoCiAgIGQ9Im0gNTQuMDY4OCw0NTAuMzEyOCBoIC03Ljk2OCB2IDYuMzc0NCBoIDguNzY0OCB2IC02LjM3NDQgeiBtIDMzNy44NDMxNyw2LjM3NDQgaCA4Ljc2NDggdiAtNi4zNzQ0IGggLTguNzY0OCB6IG0gLTYuMzc0NCw5MC4wMzg0IC0zLjk4NCwtMi4zOTA0IC03LjE3MTIsMTEuMTU1MiAtNi4zNzQ0LC0zLjk4NCA2LjM3NDQsLTkuNTYxNiAtMy45ODQsLTIuMzkwNCAtNy4xNzEyLDkuNTYxNiAtNi4zNzQ0LC0zLjk4NCA3LjE3MTIsLTExLjE1NTIgLTMuOTg0LC0yLjM5MDQgLTExLjE1NTIsMTYuNzMyOCAyNC43MDA4LDE1LjkzNiB6IG0gLTI5LjQ4MTYsMzcuNDQ5NiAtOC43NjQ4LC03Ljk2OCA3Ljk2OCwtOC43NjQ4IC0zLjE4NzIsLTMuMTg3MiAtNy45NjgsNy45NjggLTUuNTc3NiwtNS41Nzc2IDkuNTYxNiwtOS41NjE2IC0zLjE4NzIsLTMuMTg3MiAtMTMuNTQ1NiwxMy41NDU2IDIxLjUxMzYsMTkuOTIgeiBtIC0xMS45NTIsMTEuMTU1MiAtMy4xODcyLC0zLjk4NCAtMTEuMTU1Miw3Ljk2OCAtMTUuMTM5MiwtMTkuMTIzMiAtNC43ODA4LDMuOTg0IDE3LjUyOTYsMjMuMTA3MiB6IG0gLTI5LjQ4MTYsMTkuOTIgLTE0LjM0MjQsLTI1LjQ5NzYgLTUuNTc3NiwzLjE4NzIgMTQuMzQyNCwyNS40OTc2IHogbSAtMzYuNjUyOCwxNS45MzYgLTMuOTg0LC0xMS4xNTUyIDExLjk1MiwtMy45ODQgMy45ODQsMTEuMTU1MiA1LjU3NzYsLTEuNTkzNiAtOS41NjE2LC0yNy44ODggLTUuNTc3NiwxLjU5MzYgMy45ODQsMTEuMTU1MiAtMTEuOTUyLDMuOTg0IC0zLjk4NCwtMTEuMTU1MiAtNS41Nzc2LDEuNTkzNiA5LjU2MTYsMjcuODg4IHogbSAtMjMuOTAzOTksLTcuOTY4IC0wLjc5NjgsLTMuOTg0IC0xMy41NDU1OCwxLjU5MzYgMC43OTY4LDMuOTg0IHogTSAyMzIuNTUyLDYzOS45NTEyIHYgLTQuNzgwOCBoIC0xMy41NDU2IHYgLTI0LjcwMDggaCAtNi4zNzQ0IHYgMjkuNDgxNiB6IG0gLTMwLjI3ODQsLTEuNTkzNiAwLjc5NjgsLTQuNzgwOCAtMTMuNTQ1NiwtMi4zOTA0IDMuOTg0LC0yMy45MDQgLTUuNTc3NiwtMC43OTY4IC00Ljc4MDgsMjguNjg0OCB6IE0gMTY0LjgyNCw2MTcuNjQwOCBWIDYwNC44OTIgbCAtNy45NjgsOS41NjE2IHogbSA1LjU3NzYsLTE2LjczMjggdiAzMS4wNzUyIGwgLTUuNTc3NiwtMi4zOTA0IHYgLTcuMTcxMiBsIC0xMS4xNTUyLC0zLjk4NCAtNC43ODA4LDUuNTc3NiAtNS41Nzc2LC0yLjM5MDQgMjAuNzE2OCwtMjMuMTA3MiB6IG0gLTQ2LjIxNDQsMTEuMTU1MiA2LjM3NDQsLTEwLjM1ODQgMTAuMzU4NCw1LjU3NzYgMi4zOTA0LC0zLjk4NCAtMTAuMzU4NCwtNS41Nzc2IDMuOTg0LC02LjM3NDQgMTEuOTUyLDcuMTcxMiAyLjM5MDQsLTMuOTg0IC0xNi43MzI4LC05LjU2MTYgLTE1LjEzOTIsMjQuNzAwOCB6IG0gLTMuOTg0LC0zOS4wNDMyIC0xMy41NDU2LDE0LjM0MjQgMy4xODcyLC0yMy45MDQgLTMuOTg0LC0zLjk4NCAtMTkuOTIsMjEuNTEzNiAzLjk4NCwzLjk4NCAxMy41NDU2LC0xNC4zNDI0IC0yLjM5MDQsMjMuOTA0IDMuOTg0LDMuMTg3MiAxOS45MiwtMjEuNTEzNiB6IE0gNjYuODE3Niw1NTguNjc3NiBjIC00LjUzMjE3LC03LjQ0NDggLTMuNzE4NjksLTExLjk0OTQ4IDEuOTUwMjYsLTE3LjI2NTUxIGwgMTUuNTc5MzQsLTEwLjYyMjQ5IDMuMTg3Miw0Ljc4MDggLTE1LjEzOTIsMTAuMzU4NCBjIC02LjI1MjcxLDUuOTU5MzIgLTAuMDEsMTUuMzMzNDggNy45NjgsMTEuMTU1MiBsIDE1LjEzOTIsLTEwLjM1ODQgMy4xODcyLDQuNzgwOCAtMTUuMTM5MiwxMC4zNTg0IGMgLTIuMzkwNCwxLjU5MzYgLTQuNzgwOCwyLjM5MDQgLTYuMzc0NCwyLjM5MDQgLTQuMTc4ODUsMC4zMzI3NiAtNi44MjAzNCwtMS4yNjQxNCAtMTAuMzU4NCwtNS41Nzc2IG0gMzA1Ljk3MTE3LC0xODYuNDUxMiAzLjk4NCwtMS41OTM2IDYuMzc0NCwxMS45NTIgLTMuOTg0LDEuNTkzNiB6IG0gLTE1LjA1MTE4LC0yNi40NzUgYyAxLjc2NDYsMi44MjAyNyAzLjcxNzIxLDUuMjAzOCA3LjA4MzE4LDYuNTU1IDAuNzk2OCwwIDIuMzkwNCwwIDMuOTg0LC0wLjc5NjggMC43OTY4LC0wLjc5NjggMS41OTM2LC0xLjU5MzYgMi4zOTA0LC0zLjE4NzIgMCwtMC43OTY4IDAsLTIuMzkwNCAtMC43OTY4LC0zLjE4NzIgbCAtMy45ODQsLTUuNTc3NiB6IG0gMTkuMDM1MTgsNC45NjE0IGMgMCwyLjM5MDQgLTEuNTkzNiwzLjk4NCAtMy45ODQsNi4zNzQ0IC0zLjk0MTEzLDIuODU1OTcgLTcuMTk0MDksMS4xNDAxNSAtMTEuMTU1MiwwIGwgLTQuNzgwOCwxMy41NDU2IC00Ljc4MDgsLTUuNTc3NiA0Ljc4MDgsLTExLjE1NTIgLTMuMTg3MiwtMy45ODQgLTguNDEyNjksNS44NDYyMiAtNC4wNjc0OSwtNS40OTQxMSAyNC40MzIxOCwtMTcuODgxNzEgOC4yMzIwOSwxMC41MzkgYyAyLjM5MDQsMi4zOTA0IDIuOTIzMTEsNS4zOTcgMi45MjMxMSw3Ljc4NzQgbSAtNTguOTYzMiwtMjIuMzEwNCAxOS4xMjMyLC0yMi4zMTA0IDE1LjEzOTIsMTIuNzQ4OCAtMy4xODcyLDMuOTg0IC0xMC4zNTg0LC04Ljc2NDggLTQuNzgwOCw1LjU3NzYgOC43NjQ4LDcuOTY4IC0zLjE4NzIsMy45ODQgLTguNzY0OCwtNy45NjggLTQuNzgwOCw1LjU3NzYgMTAuMzU4NCw4Ljc2NDggLTMuMTg3MiwzLjk4NCB6IG0gLTIxLjUxMzYsLTEzLjU0NTYgMTEuOTUyLC0yMS41MTM2IC03Ljk2OCwtMy45ODQgMi4zOTA0LC0zLjk4NCAyMC43MTY4LDExLjE1NTIgLTIuMzkwNCwzLjk4NCAtNy45NjgsLTMuOTg0IC0xMS45NTIsMjEuNTEzNiB6IG0gLTIzLjkwNCwtOS41NjE2IDkuNTYxNiwtMjcuODg4IDUuNTc3NiwxLjU5MzYgLTkuNTYxNiwyNy44ODggeiBtIC0xOC4zMjYzOSwtMTUuMTM5MiAzLjE4NzE5LC0xOS4xMjMyIDUuNTc3NiwwLjc5NjggLTMuOTg0LDI4LjY4NDggLTQuNzgwNzksLTAuNzk2OCAtMTEuOTUxOTgsLTIxLjUxMzYgLTMuMTg3MiwxOS45MiAtNS41Nzc2LC0wLjc5NjggMy45ODQsLTI4LjY4NDggNS41Nzc2LDAuNzk2OCB6IG0gLTQyLjIzMDM4LC0yLjM5MDQgLTIuMzkwNCwtMTkuMTIzMiA1LjU3NzYsLTAuNzk2OCAzLjE4NzIsMjguNjg0OCAtNC43ODA4LDAuNzk2OCAtMTYuNzMyOCwtMTcuNTI5NiAyLjM5MDQsMTkuOTIgLTUuNTc3NiwwLjc5NjggLTMuMTg3MiwtMjguNjg0OCA1LjU3NzYsLTEuNTkzNiB6IG0gLTQyLjIzMDQsNi4zNzQ0IC03Ljk2OCwtOS41NjE2IHYgMTIuNzQ4OCB6IG0gMy4xODcyLDMuOTg0IC0xMS4xNTUyLDMuOTg0IHYgNy4xNzEyIGwgLTQuNzgwOCwxLjU5MzYgMC43OTY4LC0zMS4wNzUyIDYuMzc0NCwtMi4zOTA0IDE5LjkyLDIzLjkwNCAtNS41Nzc2LDIuMzkwNCB6IG0gLTQ1LjQxNzYsMzAuMjc4NCAtMTUuOTM2LC0yNC43MDA4IDQuNzgwOCwtMy4xODcyIDYuMzc0NCwxMC4zNTg0IDEwLjM1ODQsLTYuMzc0NCAtNi4zNzQ0LC0xMC4zNTg0IDQuNzgwOCwtMy4xODcyIDE1LjkzNiwyNC43MDA4IC00Ljc4MDgsMy4xODcyIC02LjM3NDQsLTEwLjM1ODQgLTEwLjM1ODQsNi4zNzQ0IDYuMzc0NCwxMC4zNTg0IHogbSA5NS42MTYsLTIyLjMxMDQgYyAtODIuMDcwNCwwIC0xNDkuMDAxNiw2Ni4xMzQ0IC0xNDkuMDAxNiwxNDcuNDA4IDAsODEuMjczNiA2Ni45MzEyLDE0Ny40MDggMTQ5LjAwMTYsMTQ3LjQwOCA4Mi4wNzAzNywwIDE0OS4wMDE1NywtNjYuMTM0NCAxNDkuMDAxNTcsLTE0Ny40MDggMCwtODEuMjczNiAtNjYuOTMxMiwtMTQ3LjQwOCAtMTQ5LjAwMTU3LC0xNDcuNDA4IG0gMCw0Ljc4MDggYyA3OS42Nzk5NywwIDE0NC4yMjA3Nyw2My43NDQgMTQ0LjIyMDc3LDE0Mi42MjcyIDAsNzguODgzMiAtNjQuNTQwOCwxNDIuNjI3MiAtMTQ0LjIyMDc3LDE0Mi42MjcyIC03OS42OCwwIC0xNDQuMjIwOCwtNjMuNzQ0IC0xNDQuMjIwOCwtMTQyLjYyNzIgMCwtNzguODgzMiA2NC41NDA4LC0xNDIuNjI3MiAxNDQuMjIwOCwtMTQyLjYyNzIgbSAwLC01Ni41NzI4IEMgMTExLjQzODQsMjU0LjMgMjEuNCwzNDMuNTQxNiAyMS40LDQ1My41IGMgMCwxMDkuOTU4NCA5MC4wMzg0LDE5OS4yIDIwMS41OTA0LDE5OS4yIDExMS41NTE5NywwIDIwMS41OTAzNywtODkuMjQxNiAyMDEuNTkwMzcsLTE5OS4yIDAsLTEwOS45NTg0IC05MC4wMzg0LC0xOTkuMiAtMjAxLjU5MDM3LC0xOTkuMiBtIDAsNC43ODA4IGMgMTA4LjM2NDc3LDAgMTk2LjgwOTU3LDg3LjY0OCAxOTYuODA5NTcsMTk0LjQxOTIgMCwxMDYuNzcxMiAtODguNDQ0OCwxOTQuNDE5MiAtMTk2LjgwOTU3LDE5NC40MTkyIC0xMDguMzY0OCwwIC0xOTYuODA5NiwtODcuNjQ4IC0xOTYuODA5NiwtMTk0LjQxOTIgMCwtMTA2Ljc3MTIgODguNDQ0OCwtMTk0LjQxOTIgMTk2LjgwOTYsLTE5NC40MTkyIgogICBpZD0icGF0aDEwIgogICBzdHlsZT0ic3Ryb2tlLXdpZHRoOjcuOTY4IiAvPjxwYXRoCiAgIGQ9Im0gMTA2LjEzNTU1LDM0MS43Mjg5NyBjIDQuMzY1NDgsLTMuMDQxNzkgNS42MzYsLTguMjM5MTYgMC42MjgxOCwtMTMuMzE0ODEgLTIuNjM3ODgsLTMuMjUyMDUgLTkuMjU3NDc4LC01LjEzNzg3IC0xMi41MzM2MTgsLTIuMzAxNzYgLTMuMTQ4NywyLjU3NzU0IC0zLjY1MDAxMiw3LjgwNjA3IC0wLjc0NjU4NSwxMS42ODYwNSAyLjg4ODg0LDMuNzA1NjkgOC4yNDg1MjMsNi43NjIxOSAxMi42Mzg3NDMsMy45MjAxNCBtIC0xNS43Nzc4LC0yMC4yNzc2MyBjIDcuODA3OTU5LC01LjY1MzU5IDE1LjAwNDIsLTIuMDUyNDUgMTcuODg3MTYsMC4xNTEzMyAyLjM2ODk3LDEuNTk2MzggMTQuNjcxLDEyLjI0MTQxIDMuNTM4NjksMjMuMTc3MjkgLTUuNTU4OCw2LjQ5MDM4IC0xNy45OTk2MzksNC40Mjk1NCAtMjQuMDQ2NjU1LC00LjU1NjQ5IC00LjQ5Mzk0MSwtOC41ODAwMyAtMS40ODQwMDcsLTE1LjE1NzE1IDIuNjIwODA1LC0xOC43NzIxMyB6IgogICBpZD0icGF0aDM5MTYiCiAgIHN0eWxlPSJmaWxsOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjcuOTY4IiAvPjxwYXRoCiAgIGQ9Im0gODkuNjQ3ODksMzY5LjIwOTc4IGMgLTAuNjY1MjgsMC45MTAxMSAtMS40OTcwNCwxLjk2OTg5IC0yLjczMzU1LDMuMjA3MDYgLTEuMTYzOTMsMS4xNzgxNiAtMC45OTYyNywxLjAyMTExIC0yLjY4Mzg1LC0wLjEzNzEgLTEuMjcxOTYsLTAuODk0OSAtMi41NDM4NiwtMS43OTI4MyAtMy44MTU0NCwtMi42OTA3MyAyLjEwNzk5LC0wLjY1NjczIDMuNTM1NjcsLTEuNDU5NTYgNC41MzI2OSwtMi42ODIwMyAxLjQ0MDE1LC0xLjYxNjE5IDEuNjMwNjYsLTMuODE2NDUgLTAuMTE1MDgsLTUuMjU2MzYgLTEuNDYxOSwtMS4yMzQ2NSAtMy4yMzE1NiwtMi4wMjUwOSAtNC43OTM1OSwtMy4xMTczNiAtNC40ODY1MSwtMi44MTA3MyAtOC45NzI2NiwtNS42MjM4MyAtMTMuNDU5MTQsLTguNDM1NzYgMS4xMDQ0MSwtMS41NjQ3MSAyLjIwNTg2LC0zLjEzMTY0IDMuMzExMTYsLTQuNjk1NzIgNi4xNjIyOSwzLjg2MTY5IDEyLjMyMTc0LDcuNzI4MTIgMTguNDkwNjMsMTEuNTc5NDYgMS43NDYxNywwLjg4MTc5IDQuMDI2MzQsMy4zMDk1NCA0LjUwMDM5LDUuMTA5MTIgMC40MTU4NSwxLjEwODM1IC0wLjUxNzk3LDMuNDY4MTUgLTEuNjUxMDMsNC45NzciCiAgIGlkPSJwYXRoNTM0MCIKICAgc3R5bGU9InN0cm9rZS13aWR0aDo3Ljk2OCIgLz48bWV0YWRhdGEKICAgaWQ9Im1ldGFkYXRhODc4NyI+PHJkZjpSREY+PGNjOldvcmsKICAgICAgIHJkZjphYm91dD0iIj48ZGM6dGl0bGU+SEFUQ0ggMjAyMCBMT0dPPC9kYzp0aXRsZT48L2NjOldvcms+PC9yZGY6UkRGPjwvbWV0YWRhdGE+PC9zdmc+Cg==" alt="Johanniter-Unfall-Hilfe">
+    <h1>Raumbelegung Bergstraße-Pfalz</h1>
+  </header>
 
-  <div class="toolbar">
-    <select id="standortSelect"></select>
-    <button id="prevDay">←</button>
-    <span id="dayLabel"></span>
-    <button id="nextDay">→</button>
-  </div>
-  <div id="status">Lade Daten…</div>
+  <main>
+    <p class="sub">Auf einen freien Bereich klicken und ziehen, um eine Raumanfrage zu stellen — 15-Minuten-genau.</p>
 
-  <div id="kalender">
-    <div class="zeitachse">
-      <div class="zeitachseKopf"></div>
-      <div class="zeitachseKoerper" id="zeitachse"></div>
+    <div class="toolbar">
+      <select id="standortSelect"></select>
+      <button class="nav" id="prevDay">←</button>
+      <span id="dayLabel"></span>
+      <button class="nav" id="nextDay">→</button>
     </div>
-    <div style="flex:1">
-      <div class="kopfZeile" id="kopfZeile"></div>
-      <div class="spalten" id="spalten"></div>
+
+    <div class="legende">
+      <span><span class="punkt" style="background:var(--orange)"></span>Angefragt</span>
+      <span><span class="punkt" style="background:var(--markenrot)"></span>Genehmigt</span>
     </div>
-  </div>
+
+    <div id="status">Lade Daten…</div>
+
+    <div id="kalender">
+      <div class="zeitachse">
+        <div class="zeitachseKopf"></div>
+        <div class="zeitachseKoerper" id="zeitachse"></div>
+      </div>
+      <div style="flex:1">
+        <div class="kopfZeile" id="kopfZeile"></div>
+        <div class="spalten" id="spalten"></div>
+      </div>
+    </div>
+  </main>
 
   <div id="overlay">
     <div id="modal">
-      <div style="font-weight:bold; margin-bottom:2px" id="mRaum"></div>
-      <div style="font-size:12px; color:#555; margin-bottom:10px" id="mZeit"></div>
+      <div id="mRaum"></div>
+      <div id="mZeit"></div>
       <select id="fAbteilung">
         <option value="">Abteilung wählen…</option>
         <option>Ambulante Pflege</option>
@@ -87,11 +150,11 @@
       </select>
       <input id="fVeranstaltung" placeholder="Veranstaltung">
       <input id="fTeilnehmer" type="number" min="0" placeholder="Anzahl Teilnehmende (optional)">
-      <textarea id="fBemerkung" placeholder="Bemerkung — wird noch etwas benötigt? Flipchart, Beamer & Co.?" rows="2" style="width:100%; box-sizing:border-box; margin-bottom:8px; padding:8px; border:1px solid #ccc; border-radius:4px; font-family:inherit; font-size:14px;"></textarea>
+      <textarea id="fBemerkung" placeholder="Bemerkung — wird noch etwas benötigt? Flipchart, Beamer & Co.?" rows="2"></textarea>
       <div id="err">Bitte Abteilung und Veranstaltung angeben.</div>
       <div class="row">
         <button id="fCancel">Abbrechen</button>
-        <button id="fSend" style="background:#c1121f;color:#fff;border-color:#c1121f">Anfrage senden</button>
+        <button id="fSend">Anfrage senden</button>
       </div>
     </div>
   </div>
@@ -105,7 +168,7 @@ const TOKEN = getToken();
 const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/public.json`;
 
 const RAEUME = {
-  "Viernheim": ["Seminarraum 1", "Seminarraum 2", "Seminarraum 4", "Seminarraum 5", "Werkstraße"],
+  "Viernheim": ["Seminarraum 1", "Seminarraum 2", "Seminarraum 4", "Seminarraum 5", "Seminarraum 6", "Werkstraße"],
   "Ludwigshafen-Ruchheim": ["Seminarraum 1", "Seminarraum 2", "Seminarraum 3"],
   "Speyer": ["Seminarraum"],
   "Frankenthal": ["Seminarraum"]
@@ -115,11 +178,11 @@ const RAUM_HINWEISE = {
   "Viernheim|Seminarraum 5": "Max. 18 Personen (Brandschutz, Obergeschoss)"
 };
 
-const TAG_START = 7 * 60;   // 07:00 in Minuten
-const TAG_ENDE = 20 * 60;   // 20:00 in Minuten
-const PX_PRO_MIN = 1;       // 1 Minute = 1 Pixel
-const RASTER = 15;          // Minuten-Raster
-const PADDING = 14;         // Luft oben/unten, damit 07:00 und 20:00 nicht abgeschnitten wirken
+const TAG_START = 7 * 60;
+const TAG_ENDE = 20 * 60;
+const PX_PRO_MIN = 1;
+const RASTER = 15;
+const PADDING = 14;
 const HOEHE_INNEN = (TAG_ENDE - TAG_START) * PX_PRO_MIN;
 const HOEHE = HOEHE_INNEN + PADDING * 2;
 
@@ -235,12 +298,13 @@ function render() {
       .filter(b => b.standort === aktuellerStandort && b.raum === raum && b.datum === datumStr)
       .forEach(b => {
         const start = uhrzeitZuMin(b.von), ende = uhrzeitZuMin(b.bis);
+        const istAngefragt = b.status === "angefragt";
         const block = document.createElement('div');
-        block.className = "block " + (b.status === "angefragt" ? "angefragt" : "belegt");
+        block.className = "block " + (istAngefragt ? "angefragt" : "belegt");
         block.style.top = (PADDING + (start - TAG_START) * PX_PRO_MIN) + "px";
-        block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 14) + "px";
-        block.textContent = b.von + "–" + b.bis + (b.abteilung ? " · " + b.abteilung : "");
-        block.title = `${b.von}–${b.bis} (${b.status})` + (b.abteilung ? ` — ${b.abteilung}: ${b.veranstaltung || ''}` : '');
+        block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 30) + "px";
+        block.innerHTML = `<span class="zeit-label">${b.von}–${b.bis}</span><span class="status-badge">${istAngefragt ? "Angefragt" : "Genehmigt"}</span>`;
+        block.title = `${b.von}–${b.bis} (${istAngefragt ? "Angefragt" : "Genehmigt"})` + (b.abteilung ? ` — ${b.abteilung}: ${b.veranstaltung || ''}` : '');
         spalte.appendChild(block);
       });
 
@@ -293,7 +357,7 @@ function zeichneVorschau(spalte) {
   const endeMin = TAG_START + schnappen(hi);
   vorschau.style.top = (PADDING + schnappen(lo)) + "px";
   vorschau.style.height = Math.max(schnappen(hi) - schnappen(lo) - 2, 4) + "px";
-  vorschau.textContent = minZuUhrzeit(startMin) + "–" + minZuUhrzeit(endeMin);
+  vorschau.innerHTML = `<span class="zeit-label">${minZuUhrzeit(startMin)}–${minZuUhrzeit(endeMin)}</span>`;
 }
 
 let aktRaum = null, aktVon = null, aktBis = null;
