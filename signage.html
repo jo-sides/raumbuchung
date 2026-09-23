@@ -30,6 +30,7 @@
   .titel { font-size: 22px; font-weight: 700; color: var(--markenblau); }
   .zeit { font-size: 18px; font-weight: 500; color: var(--markenblau-hell); margin-top: 2px; }
   .badge { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 14px; border-radius: 20px; background: #17a877; color: #ffffff; }
+  #mehr { font-size: 15px; color: var(--markenblau-hell); text-align: center; padding: 6px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -61,9 +62,13 @@ async function laden() {
     const alle = await res.json();
     const heute = heuteDatum();
     const jetzt = minJetzt();
-    const termine = alle
+    const alleTermine = alle
       .filter(t => t.datum === heute && minVon(t.bis) > jetzt)
       .sort((a,b) => minVon(a.von) - minVon(b.von));
+
+    const MAX_KACHELN = 3; // fest statt gemessen — zuverlässig unabhängig von der iframe-Einbettung
+    const termine = alleTermine.slice(0, MAX_KACHELN);
+    const rest = alleTermine.length - termine.length;
 
     const inhalt = document.getElementById('inhalt');
     document.getElementById('kopfzeile').style.display = termine.length ? 'flex' : 'none';
@@ -82,21 +87,7 @@ async function laden() {
           </div>
           ${laeuft ? '<span class="badge">Läuft</span>' : ''}
         </div>`;
-    }).join('');
-
-    // Keine halb abgeschnittenen Kacheln: alles entfernen, was über die verfügbare Höhe hinausragt —
-    // aber niemals die erste/einzige Kachel, und nur wenn die Höhe plausibel ermittelt werden konnte
-    // (bei 0/sehr klein hat die Umgebung z.B. noch nicht fertig geladen — dann lieber nichts abschneiden).
-    if (inhalt.clientHeight > 80) {
-      const kacheln = Array.from(inhalt.children);
-      for (let i = kacheln.length - 1; i > 0; i--) {
-        if (kacheln[i].offsetTop + kacheln[i].offsetHeight > inhalt.clientHeight) {
-          kacheln[i].remove();
-        } else {
-          break;
-        }
-      }
-    }
+    }).join('') + (rest > 0 ? `<div id="mehr">+ ${rest} weitere${rest === 1 ? 'r' : ''} Termin${rest === 1 ? '' : 'e'} heute</div>` : '');
   } catch (e) {
     document.getElementById('inhalt').innerHTML = '<div id="leer">Keine bevorstehenden Termine geplant</div>';
   }
