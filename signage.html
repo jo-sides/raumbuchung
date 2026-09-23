@@ -13,23 +13,30 @@
   }
   * { font-family: 'Maven Johanniter', Tahoma, Arial, sans-serif; box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #ffffff; color: var(--markenblau); height: 100%; overflow: hidden; }
-  body { padding: 28px 32px; }
+  body { padding: 24px 32px; display: flex; flex-direction: column; }
+  #kopfzeile { display: flex; gap: 20px; padding: 0 22px 8px; font-size: 14px; font-weight: 700; color: var(--markenblau-hell); text-transform: uppercase; letter-spacing: 0.5px; }
+  #kopfzeile .raum-kopf { min-width: 190px; }
+  #inhalt { flex: 1; overflow: hidden; }
   #leer { color: #999; font-size: 22px; text-align: center; margin-top: 18%; }
   .kachel {
     display: flex; align-items: center; gap: 20px;
     background: var(--grau); border-left: 8px solid var(--markenrot);
     border-radius: 10px; padding: 18px 22px; margin-bottom: 16px;
   }
-  .kachel.laeuft { border-left-color: #53cfad; }
+  .kachel.laeuft { background: #e3faf1; border-left-color: #17a877; }
   .raum { font-size: 30px; font-weight: 700; min-width: 190px; color: var(--markenblau); }
   .stock { font-size: 15px; font-weight: 500; color: var(--markenblau-hell); display: block; margin-top: 2px; }
   .info { flex: 1; }
   .titel { font-size: 22px; font-weight: 700; color: var(--markenblau); }
   .zeit { font-size: 18px; font-weight: 500; color: var(--markenblau-hell); margin-top: 2px; }
-  .badge { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 20px; background: #53cfad; color: #03362a; }
+  .badge { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 14px; border-radius: 20px; background: #17a877; color: #ffffff; }
 </style>
 </head>
 <body>
+  <div id="kopfzeile">
+    <span class="raum-kopf">Raum</span>
+    <span>Veranstaltung</span>
+  </div>
   <div id="inhalt"></div>
 
 <script>
@@ -59,6 +66,7 @@ async function laden() {
       .sort((a,b) => minVon(a.von) - minVon(b.von));
 
     const inhalt = document.getElementById('inhalt');
+    document.getElementById('kopfzeile').style.display = termine.length ? 'flex' : 'none';
     if (termine.length === 0) {
       inhalt.innerHTML = '<div id="leer">Keine bevorstehenden Termine geplant</div>';
       return;
@@ -75,6 +83,16 @@ async function laden() {
           ${laeuft ? '<span class="badge">Läuft</span>' : ''}
         </div>`;
     }).join('');
+
+    // Keine halb abgeschnittenen Kacheln: alles entfernen, was über die verfügbare Höhe hinausragt
+    const kacheln = Array.from(inhalt.children);
+    for (let i = kacheln.length - 1; i >= 0; i--) {
+      if (kacheln[i].offsetTop + kacheln[i].offsetHeight > inhalt.clientHeight) {
+        kacheln[i].remove();
+      } else {
+        break;
+      }
+    }
   } catch (e) {
     document.getElementById('inhalt').innerHTML = '<div id="leer">Keine bevorstehenden Termine geplant</div>';
   }
