@@ -14,7 +14,7 @@
   #dayLabel { font-weight: bold; min-width: 160px; text-align: center; }
   #status { font-size: 12px; color: #888; margin-bottom: 10px; }
 
-  #kalender { display: flex; background: #fff; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
+  #kalender { display: flex; background: #fff; border: 1px solid #ddd; border-radius: 6px; overflow: visible; }
   .zeitachse { width: 46px; flex-shrink: 0; border-right: 1px solid #ddd; }
   .zeitachseKopf { height: 33px; box-sizing: border-box; border-bottom: 1px solid #ddd; }
   .zeitachseKoerper { position: relative; }
@@ -68,9 +68,27 @@
     <div id="modal">
       <div style="font-weight:bold; margin-bottom:2px" id="mRaum"></div>
       <div style="font-size:12px; color:#555; margin-bottom:10px" id="mZeit"></div>
-      <input id="fName" placeholder="Name">
-      <input id="fBereich" placeholder="Bereich (z.B. Breitenausbildung)">
-      <div id="err">Bitte Name eintragen.</div>
+      <select id="fAbteilung">
+        <option value="">Abteilung wählen…</option>
+        <option>Ambulante Pflege</option>
+        <option>Ausbildung</option>
+        <option>Rettungsdienst</option>
+        <option>Rettungsdienstschule</option>
+        <option>Hausnotruf</option>
+        <option>Fahrdienst</option>
+        <option>Kinder- und Jugendhilfe</option>
+        <option>Jugend</option>
+        <option>Ehrenamt</option>
+        <option>Zentrale</option>
+        <option>Verwaltung</option>
+        <option>BGM</option>
+        <option>MAV</option>
+        <option>QM</option>
+      </select>
+      <input id="fVeranstaltung" placeholder="Veranstaltung">
+      <input id="fTeilnehmer" type="number" min="0" placeholder="Anzahl Teilnehmende (optional)">
+      <textarea id="fBemerkung" placeholder="Bemerkung — wird noch etwas benötigt? Flipchart, Beamer & Co.?" rows="2" style="width:100%; box-sizing:border-box; margin-bottom:8px; padding:8px; border:1px solid #ccc; border-radius:4px; font-family:inherit; font-size:14px;"></textarea>
+      <div id="err">Bitte Abteilung und Veranstaltung angeben.</div>
       <div class="row">
         <button id="fCancel">Abbrechen</button>
         <button id="fSend" style="background:#c1121f;color:#fff;border-color:#c1121f">Anfrage senden</button>
@@ -99,9 +117,11 @@ const RAUM_HINWEISE = {
 
 const TAG_START = 7 * 60;   // 07:00 in Minuten
 const TAG_ENDE = 20 * 60;   // 20:00 in Minuten
-const PX_PRO_MIN = 1;       // 1 Minute = 1 Pixel -> 780px hoch
+const PX_PRO_MIN = 1;       // 1 Minute = 1 Pixel
 const RASTER = 15;          // Minuten-Raster
-const HOEHE = (TAG_ENDE - TAG_START) * PX_PRO_MIN;
+const PADDING = 14;         // Luft oben/unten, damit 07:00 und 20:00 nicht abgeschnitten wirken
+const HOEHE_INNEN = (TAG_ENDE - TAG_START) * PX_PRO_MIN;
+const HOEHE = HOEHE_INNEN + PADDING * 2;
 
 let aktuellerStandort = "Viernheim";
 let aktuellesDatum = new Date();
@@ -171,7 +191,7 @@ function renderZeitachse() {
   for (let m = TAG_START; m <= TAG_ENDE; m += 60) {
     const marke = document.createElement('div');
     marke.className = "marke";
-    marke.style.top = ((m - TAG_START) * PX_PRO_MIN) + "px";
+    marke.style.top = (PADDING + (m - TAG_START) * PX_PRO_MIN) + "px";
     marke.textContent = minZuUhrzeit(m);
     achse.appendChild(marke);
   }
@@ -217,24 +237,24 @@ function render() {
         const start = uhrzeitZuMin(b.von), ende = uhrzeitZuMin(b.bis);
         const block = document.createElement('div');
         block.className = "block " + (b.status === "angefragt" ? "angefragt" : "belegt");
-        block.style.top = ((start - TAG_START) * PX_PRO_MIN) + "px";
+        block.style.top = (PADDING + (start - TAG_START) * PX_PRO_MIN) + "px";
         block.style.height = Math.max((ende - start) * PX_PRO_MIN - 2, 14) + "px";
-        block.textContent = b.von + "–" + b.bis;
-        block.title = `${b.von}–${b.bis} (${b.status})`;
+        block.textContent = b.von + "–" + b.bis + (b.abteilung ? " · " + b.abteilung : "");
+        block.title = `${b.von}–${b.bis} (${b.status})` + (b.abteilung ? ` — ${b.abteilung}: ${b.veranstaltung || ''}` : '');
         spalte.appendChild(block);
       });
 
     spalte.addEventListener('mousedown', (e) => {
       const rect = spalte.getBoundingClientRect();
       ziehend = true; ziehRaum = raum;
-      ziehStartY = e.clientY - rect.top;
+      ziehStartY = Math.max(0, Math.min(HOEHE_INNEN, e.clientY - rect.top - PADDING));
       ziehAktY = ziehStartY;
       zeichneVorschau(spalte);
     });
     spalte.addEventListener('mousemove', (e) => {
       if (!ziehend || spalte.dataset.raum !== ziehRaum) return;
       const rect = spalte.getBoundingClientRect();
-      ziehAktY = e.clientY - rect.top;
+      ziehAktY = Math.max(0, Math.min(HOEHE_INNEN, e.clientY - rect.top - PADDING));
       zeichneVorschau(spalte);
     });
     window.addEventListener('mouseup', () => {
@@ -245,8 +265,9 @@ function render() {
         const lo = Math.min(ziehStartY, ziehAktY), hi = Math.max(ziehStartY, ziehAktY);
         if (hi - lo >= RASTER * PX_PRO_MIN) {
           oeffneModal(ziehRaum, lo, hi);
+        } else {
+          vorschau.remove();
         }
-        vorschau.remove();
       }
     });
 
@@ -270,7 +291,7 @@ function zeichneVorschau(spalte) {
   const lo = Math.min(ziehStartY, ziehAktY), hi = Math.max(ziehStartY, ziehAktY);
   const startMin = TAG_START + schnappen(lo);
   const endeMin = TAG_START + schnappen(hi);
-  vorschau.style.top = (schnappen(lo)) + "px";
+  vorschau.style.top = (PADDING + schnappen(lo)) + "px";
   vorschau.style.height = Math.max(schnappen(hi) - schnappen(lo) - 2, 4) + "px";
   vorschau.textContent = minZuUhrzeit(startMin) + "–" + minZuUhrzeit(endeMin);
 }
@@ -286,10 +307,17 @@ function oeffneModal(raum, lo, hi) {
   document.getElementById('overlay').style.display = "flex";
 }
 
-document.getElementById('fCancel').onclick = () => { document.getElementById('overlay').style.display = "none"; render(); };
+document.getElementById('fCancel').onclick = () => {
+  document.getElementById('overlay').style.display = "none";
+  const v = document.getElementById('vorschauBlock');
+  if (v) v.remove();
+};
 document.getElementById('fSend').onclick = async () => {
-  const name = document.getElementById('fName').value.trim();
-  if (!name) { document.getElementById('err').style.display = "block"; return; }
+  const abteilung = document.getElementById('fAbteilung').value;
+  const veranstaltung = document.getElementById('fVeranstaltung').value.trim();
+  const teilnehmer = document.getElementById('fTeilnehmer').value;
+  const bemerkung = document.getElementById('fBemerkung').value.trim();
+  if (!abteilung || !veranstaltung) { document.getElementById('err').style.display = "block"; return; }
   document.getElementById('err').style.display = "none";
   const neu = {
     id: "b_" + fmtDatum(aktuellesDatum) + "_" + aktRaum.replace(/\s+/g,'') + "_" + Date.now(),
@@ -298,13 +326,20 @@ document.getElementById('fSend').onclick = async () => {
     datum: fmtDatum(aktuellesDatum),
     von: aktVon,
     bis: aktBis,
-    status: "angefragt"
+    status: "angefragt",
+    abteilung: abteilung,
+    veranstaltung: veranstaltung,
+    teilnehmer: teilnehmer ? parseInt(teilnehmer) : null,
+    bemerkung: bemerkung
   };
   document.getElementById('fSend').textContent = "Sende…";
   await speichereNeueBuchung(neu);
   document.getElementById('fSend').textContent = "Anfrage senden";
   document.getElementById('overlay').style.display = "none";
-  document.getElementById('fName').value = ""; document.getElementById('fBereich').value = "";
+  document.getElementById('fAbteilung').value = "";
+  document.getElementById('fVeranstaltung').value = "";
+  document.getElementById('fTeilnehmer').value = "";
+  document.getElementById('fBemerkung').value = "";
   await ladeDaten();
 };
 
