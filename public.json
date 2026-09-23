@@ -66,5 +66,18 @@
     "bis": "13:00",
     "status": "genehmigt",
     "veranstaltung": "Kurs"
+  },
+  {
+    "id": "b_2026-09-23_Seminarraum2_1790177778301",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 2",
+    "datum": "2026-09-23",
+    "von": "10:00",
+    "bis": "14:00",
+    "status": "genehmigt",
+    "abteilung": "Rettungsdienst",
+    "veranstaltung": "RD FoBI",
+    "teilnehmer": 15,
+    "bemerkung": ""
   }
 ]
