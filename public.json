@@ -106,5 +106,18 @@
     "veranstaltung": "Test2",
     "teilnehmer": 15,
     "bemerkung": ""
+  },
+  {
+    "id": "b_2026-09-23_Seminarraum5_1790182427303",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 5",
+    "datum": "2026-09-23",
+    "von": "20:00",
+    "bis": "23:00",
+    "status": "angefragt",
+    "abteilung": "Rettungsdienstschule",
+    "veranstaltung": "TEST3",
+    "teilnehmer": null,
+    "bemerkung": ""
   }
 ]
