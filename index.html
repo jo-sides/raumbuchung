@@ -44,6 +44,15 @@
   .mkTag.leer { visibility: hidden; cursor: default; }
   #mkHeuteBtn { width: 100%; margin-top: 10px; padding: 7px; border-radius: 8px; border: 1.5px solid var(--markenblau-hell); background: var(--markenweiss); color: var(--markenblau-hell); font-size: 12px; font-weight: 700; cursor: pointer; }
   #mkHeuteBtn:hover { background: var(--markenblau-hell); color: #fff; }
+
+  /* Schmale Einbettung (z.B. 4juh-iFrame): Kalender legt sich über die Raumübersicht statt seitlich zu quetschen */
+  @media (max-width: 900px) {
+    main { flex-direction: column; }
+    #kalenderSeitenleiste { width: 100%; position: static; }
+    #mkTage, .mkWochentage { max-width: 480px; margin-left: auto; margin-right: auto; }
+    .mkKopf { max-width: 480px; margin-left: auto; margin-right: auto; }
+    #mkHeuteBtn { max-width: 480px; margin: 10px auto 0; }
+  }
   p.sub { color: var(--markenblau-hell); margin: 0 0 18px; font-size: 14px; }
 
   .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
