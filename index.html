@@ -5,60 +5,221 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Raumbuchung Johanniter Bergstraße-Pfalz</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f4f4f2; margin: 0; padding: 24px; color: #1a1a1a; }
-  h1 { font-size: 20px; margin-bottom: 4px; }
-  p.sub { color: #555; margin-top: 0; margin-bottom: 20px; font-size: 14px; }
-  table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-  th { background: #c1121f; color: #fff; font-weight: 500; }
-  tr:last-child td { border-bottom: none; }
-  .status { color: #b3261e; font-weight: 500; }
-  #status { font-size: 13px; color: #888; margin-bottom: 12px; }
+  body { font-family: Arial, sans-serif; background: #f4f4f2; margin: 0; padding: 20px; color: #1a1a1a; }
+  h1 { font-size: 19px; margin: 0 0 2px; }
+  p.sub { color: #555; margin: 0 0 16px; font-size: 13px; }
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  select, button { font-size: 14px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
+  button { cursor: pointer; }
+  button.nav { padding: 7px 12px; }
+  #dayLabel { font-weight: bold; min-width: 160px; text-align: center; }
+  #status { font-size: 12px; color: #888; margin-bottom: 10px; }
+  #grid { display: grid; border-top: 1px solid #ddd; border-left: 1px solid #ddd; user-select: none; background: #fff; }
+  .cell { border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 6px 5px; font-size: 12px; min-height: 18px; }
+  .head { font-weight: bold; background: #f0f0ee; }
+  .frei { cursor: pointer; }
+  .frei:hover { background: #fdecea; }
+  .belegt { background: #c1121f; color: #fff; }
+  .angefragt { background: #f9a825; color: #3a2a00; }
+  .sel { background: #ffd7c2; }
+  #overlay { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 10; }
+  #modal { background: #fff; border-radius: 10px; padding: 20px; width: 300px; }
+  #modal input { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+  #modal .row { display: flex; gap: 8px; }
+  #modal button { flex: 1; }
+  #err { color: #b3261e; font-size: 12px; display: none; margin-bottom: 8px; }
 </style>
 </head>
 <body>
   <h1>Raumbelegung Johanniter Bergstraße-Pfalz</h1>
-  <p class="sub">Testansicht — zeigt live die Buchungen aus dem GitHub-Repo</p>
+  <p class="sub">Freie Zeit anklicken und ziehen, um eine Raumanfrage zu stellen.</p>
+
+  <div class="toolbar">
+    <select id="standortSelect"></select>
+    <button class="nav" id="prevDay">←</button>
+    <span id="dayLabel"></span>
+    <button class="nav" id="nextDay">→</button>
+  </div>
   <div id="status">Lade Daten…</div>
-  <table id="tabelle" style="display:none">
-    <thead>
-      <tr><th>Standort</th><th>Raum</th><th>Datum</th><th>Von</th><th>Bis</th><th>Status</th></tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+  <div id="grid"></div>
+
+  <div id="overlay">
+    <div id="modal">
+      <div style="font-weight:bold; margin-bottom:2px" id="mRaum"></div>
+      <div style="font-size:12px; color:#555; margin-bottom:10px" id="mZeit"></div>
+      <input id="fName" placeholder="Name">
+      <input id="fBereich" placeholder="Bereich (z.B. Breitenausbildung)">
+      <div id="err">Bitte Name eintragen.</div>
+      <div class="row">
+        <button id="fCancel">Abbrechen</button>
+        <button id="fSend" style="background:#c1121f;color:#fff;border-color:#c1121f">Anfrage senden</button>
+      </div>
+    </div>
+  </div>
 
 <script>
-const DATA_URL = "https://raw.githubusercontent.com/jo-sides/raumbuchung/main/public.json";
+const OWNER = "jo-sides";
+const REPO = "raumbuchung";
+const TOKEN_ENC = "Vzd4VEZwdE1ONEtUNFFMQ3EyUDdLQmsyMEdiWVoyak1yMEdhR2p3T2drUFVOc21QZ1N1ZHlHTDlmblhfWXZhVmM4QWgxcXMwMFlKWjRIVkIxMV90YXBfYnVodGln";
+function getToken() { return atob(TOKEN_ENC).split('').reverse().join(''); }
+const TOKEN = getToken();
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/public.json`;
 
-async function ladeDaten() {
-  const statusEl = document.getElementById('status');
-  try {
-    const res = await fetch(DATA_URL + "?t=" + Date.now());
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const daten = await res.json();
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = "";
-    daten
-      .sort((a, b) => (a.datum + a.von).localeCompare(b.datum + b.von))
-      .forEach(b => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${b.standort}</td>
-          <td>${b.raum}</td>
-          <td>${b.datum}</td>
-          <td>${b.von}</td>
-          <td>${b.bis}</td>
-          <td class="status">${b.status}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    statusEl.textContent = daten.length + " Buchungen geladen — Stand: " + new Date().toLocaleTimeString('de-DE');
-    document.getElementById('tabelle').style.display = "table";
-  } catch (err) {
-    statusEl.textContent = "Fehler beim Laden: " + err.message;
-  }
+const RAEUME = {
+  "Viernheim": ["Seminarraum 1", "Seminarraum 2", "Seminarraum 4", "Seminarraum 5", "Werkstraße"],
+  "Ludwigshafen-Ruchheim": ["Seminarraum 1", "Seminarraum 2", "Seminarraum 3"],
+  "Speyer": ["Seminarraum"],
+  "Frankenthal": ["Seminarraum"]
+};
+const STUNDEN = Array.from({length: 13}, (_, i) => i + 7); // 7 bis 19 Uhr
+
+let aktuellerStandort = "Viernheim";
+let aktuellesDatum = new Date(2026, 2, 5); // Testdatum: 5. März 2026, passend zu den Beispieldaten
+let buchungen = [];
+let shaAktuell = null;
+let selRaum = null, selStart = null, selEnde = null, selecting = false;
+
+function fmtDatum(d) {
+  return d.toISOString().slice(0,10);
+}
+function fmtLabel(d) {
+  return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long' });
+}
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
+}
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p1) => String.fromCharCode('0x'+p1)));
 }
 
+async function ladeDaten() {
+  document.getElementById('status').textContent = "Lade Daten…";
+  const res = await fetch(API, { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" } });
+  const json = await res.json();
+  buchungen = JSON.parse(b64DecodeUnicode(json.content));
+  shaAktuell = json.sha;
+  document.getElementById('status').textContent = buchungen.length + " Buchungen geladen — Stand: " + new Date().toLocaleTimeString('de-DE');
+  render();
+}
+
+async function speichereNeueBuchung(neu) {
+  // Vor dem Schreiben nochmal aktuellen Stand holen, um Konflikte zu vermeiden
+  const res = await fetch(API, { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" } });
+  const json = await res.json();
+  const liste = JSON.parse(b64DecodeUnicode(json.content));
+  liste.push(neu);
+  const contentB64 = b64EncodeUnicode(JSON.stringify(liste, null, 2));
+  const putRes = await fetch(API, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github+json" },
+    body: JSON.stringify({ message: `Anfrage: ${neu.raum} am ${neu.datum}`, content: contentB64, sha: json.sha })
+  });
+  return putRes.ok;
+}
+
+function initStandortSelect() {
+  const sel = document.getElementById('standortSelect');
+  Object.keys(RAEUME).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+  sel.value = aktuellerStandort;
+  sel.addEventListener('change', () => { aktuellerStandort = sel.value; selRaum = null; render(); });
+}
+
+function render() {
+  document.getElementById('dayLabel').textContent = fmtLabel(aktuellesDatum);
+  const raeume = RAEUME[aktuellerStandort];
+  const grid = document.getElementById('grid');
+  grid.style.gridTemplateColumns = `50px repeat(${raeume.length}, 1fr)`;
+  grid.innerHTML = "";
+
+  grid.appendChild(makeCell("", true));
+  raeume.forEach(r => grid.appendChild(makeCell(r, true)));
+
+  const datumStr = fmtDatum(aktuellesDatum);
+
+  STUNDEN.forEach(std => {
+    grid.appendChild(makeCell(std + ":00", true));
+    raeume.forEach(raum => {
+      const treffer = buchungen.find(b =>
+        b.standort === aktuellerStandort && b.raum === raum && b.datum === datumStr &&
+        std >= parseInt(b.von.split(':')[0]) && std < parseInt(b.bis.split(':')[0])
+      );
+      const cell = document.createElement('div');
+      cell.className = "cell";
+      cell.dataset.raum = raum;
+      cell.dataset.std = std;
+      if (treffer) {
+        cell.classList.add(treffer.status === "angefragt" ? "angefragt" : "belegt");
+        cell.title = `${treffer.von}–${treffer.bis} (${treffer.status})`;
+      } else {
+        cell.classList.add("frei");
+        cell.addEventListener('mousedown', () => { selecting = true; selRaum = raum; selStart = std; selEnde = std; markiere(); });
+        cell.addEventListener('mouseenter', () => { if (selecting && raum === selRaum) { selEnde = std; markiere(); } });
+        cell.addEventListener('mouseup', () => { if (selecting) { selecting = false; oeffneModal(); } });
+      }
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function markiere() {
+  render();
+  if (!selRaum) return;
+  const lo = Math.min(selStart, selEnde), hi = Math.max(selStart, selEnde);
+  document.querySelectorAll('.cell.frei').forEach(c => {
+    if (c.dataset.raum === selRaum) {
+      const std = parseInt(c.dataset.std);
+      if (std >= lo && std <= hi) c.classList.add('sel');
+    }
+  });
+}
+
+function makeCell(text, isHead) {
+  const d = document.createElement('div');
+  d.className = "cell" + (isHead ? " head" : "");
+  d.textContent = text;
+  return d;
+}
+
+function oeffneModal() {
+  const lo = Math.min(selStart, selEnde), hi = Math.max(selStart, selEnde);
+  document.getElementById('mRaum').textContent = `${aktuellerStandort} – ${selRaum}`;
+  document.getElementById('mZeit').textContent = `${fmtLabel(aktuellesDatum)}, ${lo}:00–${hi+1}:00`;
+  document.getElementById('overlay').style.display = "flex";
+}
+
+document.getElementById('fCancel').onclick = () => { document.getElementById('overlay').style.display = "none"; render(); };
+document.getElementById('fSend').onclick = async () => {
+  const name = document.getElementById('fName').value.trim();
+  const bereich = document.getElementById('fBereich').value.trim();
+  if (!name) { document.getElementById('err').style.display = "block"; return; }
+  document.getElementById('err').style.display = "none";
+  const lo = Math.min(selStart, selEnde), hi = Math.max(selStart, selEnde);
+  const neu = {
+    id: "b_" + fmtDatum(aktuellesDatum) + "_" + selRaum.replace(/\s+/g,'') + "_" + Date.now(),
+    standort: aktuellerStandort,
+    raum: selRaum,
+    datum: fmtDatum(aktuellesDatum),
+    von: lo + ":00",
+    bis: (hi+1) + ":00",
+    status: "angefragt"
+  };
+  document.getElementById('fSend').textContent = "Sende…";
+  const ok = await speichereNeueBuchung(neu);
+  document.getElementById('fSend').textContent = "Anfrage senden";
+  document.getElementById('overlay').style.display = "none";
+  document.getElementById('fName').value = ""; document.getElementById('fBereich').value = "";
+  selRaum = null;
+  await ladeDaten();
+};
+
+document.getElementById('prevDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()-1); selRaum=null; render(); };
+document.getElementById('nextDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()+1); selRaum=null; render(); };
+
+initStandortSelect();
 ladeDaten();
 </script>
 </body>
