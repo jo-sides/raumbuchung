@@ -388,6 +388,16 @@ function render() {
 
     spalten.appendChild(spalte);
   });
+
+  springeZuStartzeit();
+}
+
+function springeZuStartzeit() {
+  const koerper = document.getElementById('kalenderKoerper');
+  if (!koerper || koerper.dataset.vorgesprungen === fmtDatum(aktuellesDatum) + aktuellerStandort) return;
+  const startStunde = 7;
+  koerper.scrollTop = Math.max(0, PADDING + startStunde * 60 * PX_PRO_MIN - 20);
+  koerper.dataset.vorgesprungen = fmtDatum(aktuellesDatum) + aktuellerStandort;
 }
 
 function schnappen(y) {
