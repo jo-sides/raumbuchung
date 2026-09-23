@@ -27,7 +27,23 @@
   header img { height: 34px; position: relative; z-index: 1; }
   header h1 { font-size: 22px; font-weight: 700; color: var(--markenweiss); margin: 0; position: relative; z-index: 1; letter-spacing: 0.2px; }
 
-  main { max-width: 1100px; margin: 0 auto; padding: 22px 24px 40px; }
+  main { max-width: none; margin: 0; padding: 22px 28px 40px; box-sizing: border-box; display: flex; gap: 26px; align-items: flex-start; }
+  #kalenderSeitenleiste { width: 280px; flex-shrink: 0; background: var(--markenweiss); border: 1.5px solid var(--grau); border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,5,72,0.06); position: sticky; top: 16px; }
+  #hauptbereich { flex: 1; min-width: 0; }
+  .mkKopf { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .mkKopf button { border: none; background: var(--grau); color: var(--markenblau-hell); width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .mkKopf button:hover { background: var(--markenblau-hell); color: #fff; }
+  #mkTitel { font-weight: 700; font-size: 14px; color: var(--markenblau); text-align: center; flex: 1; }
+  .mkWochentage { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 10.5px; font-weight: 700; color: var(--markenblau-hell); margin-bottom: 4px; }
+  #mkTage { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .mkTag { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12.5px; border-radius: 6px; cursor: pointer; color: var(--markenblau); }
+  .mkTag:hover { background: var(--grau); }
+  .mkTag.wochenende { color: var(--markenrot); }
+  .mkTag.heute { border: 1.5px solid var(--markenblau-hell); font-weight: 700; }
+  .mkTag.ausgewaehlt { background: var(--markenrot); color: #fff; font-weight: 700; }
+  .mkTag.leer { visibility: hidden; cursor: default; }
+  #mkHeuteBtn { width: 100%; margin-top: 10px; padding: 7px; border-radius: 8px; border: 1.5px solid var(--markenblau-hell); background: var(--markenweiss); color: var(--markenblau-hell); font-size: 12px; font-weight: 700; cursor: pointer; }
+  #mkHeuteBtn:hover { background: var(--markenblau-hell); color: #fff; }
   p.sub { color: var(--markenblau-hell); margin: 0 0 18px; font-size: 14px; }
 
   .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
@@ -102,6 +118,19 @@
   </header>
 
   <main>
+    <aside id="kalenderSeitenleiste">
+      <div class="mkKopf">
+        <button id="mkJahrZurueck" title="Vorheriges Jahr">«</button>
+        <button id="mkMonatZurueck" title="Vorheriger Monat">‹</button>
+        <span id="mkTitel"></span>
+        <button id="mkMonatVor" title="Nächster Monat">›</button>
+        <button id="mkJahrVor" title="Nächstes Jahr">»</button>
+      </div>
+      <div class="mkWochentage"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div>
+      <div id="mkTage"></div>
+      <button id="mkHeuteBtn">Heute</button>
+    </aside>
+    <div id="hauptbereich">
     <p class="sub">Auf einen freien Bereich klicken und ziehen, um eine Raumanfrage zu stellen — 15-Minuten-genau.</p>
 
     <div class="toolbar">
@@ -133,6 +162,7 @@
       <div style="flex:1">
         <div class="spalten" id="spalten"></div>
       </div>
+    </div>
     </div>
   </main>
 
@@ -453,8 +483,65 @@ document.getElementById('fSend').onclick = async () => {
   await ladeDaten();
 };
 
-document.getElementById('prevDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()-1); render(); };
-document.getElementById('nextDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()+1); render(); };
+function syncMiniKalenderMonat() {
+  if (typeof mkBlickMonat === 'undefined') return;
+  if (mkBlickMonat.getFullYear() !== aktuellesDatum.getFullYear() || mkBlickMonat.getMonth() !== aktuellesDatum.getMonth()) {
+    mkBlickMonat = new Date(aktuellesDatum.getFullYear(), aktuellesDatum.getMonth(), 1);
+  }
+  renderMiniKalender();
+}
+document.getElementById('prevDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()-1); render(); syncMiniKalenderMonat(); };
+document.getElementById('nextDay').onclick = () => { aktuellesDatum.setDate(aktuellesDatum.getDate()+1); render(); syncMiniKalenderMonat(); };
+
+// ---------- Dauerkalender links ----------
+let mkBlickMonat = new Date(aktuellesDatum.getFullYear(), aktuellesDatum.getMonth(), 1);
+
+function renderMiniKalender() {
+  document.getElementById('mkTitel').textContent = mkBlickMonat.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  const jahr = mkBlickMonat.getFullYear(), monat = mkBlickMonat.getMonth();
+  const ersterTag = new Date(jahr, monat, 1);
+  const anzahlTage = new Date(jahr, monat + 1, 0).getDate();
+  let startOffset = ersterTag.getDay() - 1; if (startOffset < 0) startOffset = 6;
+
+  const heute = new Date();
+  const heuteStr = fmtDatum(heute);
+  const ausgewaehltStr = fmtDatum(aktuellesDatum);
+
+  const tageEl = document.getElementById('mkTage');
+  tageEl.innerHTML = "";
+  for (let i = 0; i < startOffset; i++) {
+    const d = document.createElement('div'); d.className = "mkTag leer"; tageEl.appendChild(d);
+  }
+  for (let t = 1; t <= anzahlTage; t++) {
+    const datum = new Date(jahr, monat, t);
+    const datumStr = fmtDatum(datum);
+    const wochentag = datum.getDay();
+    const el = document.createElement('div');
+    let klassen = "mkTag";
+    if (wochentag === 0 || wochentag === 6) klassen += " wochenende";
+    if (datumStr === heuteStr) klassen += " heute";
+    if (datumStr === ausgewaehltStr) klassen += " ausgewaehlt";
+    el.className = klassen;
+    el.textContent = t;
+    el.addEventListener('click', () => {
+      aktuellesDatum = new Date(jahr, monat, t);
+      render();
+      renderMiniKalender();
+    });
+    tageEl.appendChild(el);
+  }
+}
+document.getElementById('mkMonatZurueck').onclick = () => { mkBlickMonat.setMonth(mkBlickMonat.getMonth() - 1); renderMiniKalender(); };
+document.getElementById('mkMonatVor').onclick = () => { mkBlickMonat.setMonth(mkBlickMonat.getMonth() + 1); renderMiniKalender(); };
+document.getElementById('mkJahrZurueck').onclick = () => { mkBlickMonat.setFullYear(mkBlickMonat.getFullYear() - 1); renderMiniKalender(); };
+document.getElementById('mkJahrVor').onclick = () => { mkBlickMonat.setFullYear(mkBlickMonat.getFullYear() + 1); renderMiniKalender(); };
+document.getElementById('mkHeuteBtn').onclick = () => {
+  aktuellesDatum = new Date();
+  mkBlickMonat = new Date(aktuellesDatum.getFullYear(), aktuellesDatum.getMonth(), 1);
+  render();
+  renderMiniKalender();
+};
+renderMiniKalender();
 
 initStandortSelect();
 ladeDaten();
