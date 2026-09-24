@@ -130,7 +130,8 @@
     "von": "07:00",
     "bis": "16:30",
     "status": "genehmigt",
-    "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
+    "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung",
+    "loeschungAngefordert": true
   },
   {
     "id": "b_2026-09-24_Seminarraum5_1790247101189",
