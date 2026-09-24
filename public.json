@@ -144,5 +144,18 @@
     "veranstaltung": "Test",
     "teilnehmer": null,
     "bemerkung": ""
+  },
+  {
+    "id": "b_2026-09-24_Seminarraum5_1790249266421",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 5",
+    "datum": "2026-09-24",
+    "von": "15:15",
+    "bis": "17:45",
+    "status": "angefragt",
+    "abteilung": "Kinder- und Jugendhilfe",
+    "veranstaltung": "Teamsitzung",
+    "teilnehmer": 10,
+    "bemerkung": ""
   }
 ]
