@@ -158,7 +158,8 @@
     "abteilung": "Kinder- und Jugendhilfe",
     "veranstaltung": "Teamsitzung",
     "teilnehmer": 10,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "kurs_ViernheimSeminarraum220260925",
