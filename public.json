@@ -109,7 +109,8 @@
     "abteilung": "Rettungsdienstschule",
     "veranstaltung": "Erste-Hilfe-Kurs",
     "teilnehmer": 15,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "b_2026-09-23_Seminarraum5_1790186139140",
