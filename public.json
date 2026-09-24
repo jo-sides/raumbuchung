@@ -120,7 +120,8 @@
     "abteilung": "Hausnotruf",
     "veranstaltung": "TESTI",
     "teilnehmer": null,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "kurs_ViernheimSeminarraum220260924",
