@@ -143,7 +143,8 @@
     "von": "09:00",
     "bis": "12:00",
     "status": "genehmigt",
-    "veranstaltung": "TEST5"
+    "veranstaltung": "TEST5",
+    "loeschungAngefordert": true
   },
   {
     "id": "kurs_ViernheimSeminarraum220260925",
