@@ -55,7 +55,8 @@
     "abteilung": "Ausbildung",
     "veranstaltung": "Test",
     "teilnehmer": 15,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "b_2026-09-23_Seminarraum2_1790177778301",
