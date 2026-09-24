@@ -145,5 +145,15 @@
     "veranstaltung": "FobI",
     "teilnehmer": 15,
     "bemerkung": ""
+  },
+  {
+    "id": "kurs_ViernheimSeminarraum220260924",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 2",
+    "datum": "2026-09-24",
+    "von": "09:00",
+    "bis": "12:00",
+    "status": "genehmigt",
+    "veranstaltung": "TEST5"
   }
 ]
