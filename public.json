@@ -131,5 +131,18 @@
     "bis": "16:30",
     "status": "genehmigt",
     "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
+  },
+  {
+    "id": "b_2026-09-24_Seminarraum5_1790247101189",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 5",
+    "datum": "2026-09-24",
+    "von": "07:00",
+    "bis": "15:15",
+    "status": "angefragt",
+    "abteilung": "Rettungsdienstschule",
+    "veranstaltung": "Test",
+    "teilnehmer": null,
+    "bemerkung": ""
   }
 ]
