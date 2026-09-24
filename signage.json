@@ -88,5 +88,15 @@
     "von": "09:00",
     "bis": "12:00",
     "titel": "TEST5"
+  },
+  {
+    "raum": "Seminarraum 2",
+    "kuerzel": "SR2",
+    "pfeil": "➡️",
+    "stock": "EG",
+    "datum": "2026-09-25",
+    "von": "17:00",
+    "bis": "20:00",
+    "titel": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
   }
 ]
