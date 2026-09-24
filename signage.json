@@ -10,16 +10,6 @@
     "titel": "TEST2"
   },
   {
-    "raum": "Seminarraum 5",
-    "kuerzel": "SR5",
-    "pfeil": "↖️",
-    "stock": "2.OG",
-    "datum": "2026-09-23",
-    "von": "20:00",
-    "bis": "23:00",
-    "titel": "Erste-Hilfe-Kurs"
-  },
-  {
     "raum": "Seminarraum 2",
     "kuerzel": "SR2",
     "pfeil": "➡️",
