@@ -97,7 +97,8 @@
     "abteilung": "Kinder- und Jugendhilfe",
     "veranstaltung": "TEST2",
     "teilnehmer": 15,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "b_2026-09-23_Seminarraum5_1790182427303",
