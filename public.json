@@ -43,5 +43,18 @@
     "von": "09:00",
     "bis": "16:45",
     "status": "gebucht"
+  },
+  {
+    "id": "b_2026-09-24_Seminarraum5_1790271754990",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 5",
+    "datum": "2026-09-24",
+    "von": "08:00",
+    "bis": "13:30",
+    "status": "angefragt",
+    "abteilung": "Rettungsdienst",
+    "veranstaltung": "Test3",
+    "teilnehmer": 15,
+    "bemerkung": ""
   }
 ]
