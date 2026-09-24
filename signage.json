@@ -78,5 +78,15 @@
     "von": "08:00",
     "bis": "16:30",
     "titel": "FobI"
+  },
+  {
+    "raum": "Seminarraum 2",
+    "kuerzel": "SR2",
+    "pfeil": "➡️",
+    "stock": "EG",
+    "datum": "2026-09-24",
+    "von": "09:00",
+    "bis": "12:00",
+    "titel": "TEST5"
   }
 ]
