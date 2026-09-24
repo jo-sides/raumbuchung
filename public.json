@@ -144,7 +144,8 @@
     "abteilung": "Rettungsdienstschule",
     "veranstaltung": "Test",
     "teilnehmer": null,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "b_2026-09-24_Seminarraum5_1790249266421",
