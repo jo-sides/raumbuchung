@@ -59,20 +59,6 @@
     "loeschungAngefordert": true
   },
   {
-    "id": "b_2026-09-24_Seminarraum5_1790247101189",
-    "standort": "Viernheim",
-    "raum": "Seminarraum 5",
-    "datum": "2026-09-24",
-    "von": "07:00",
-    "bis": "15:15",
-    "status": "genehmigt",
-    "abteilung": "Rettungsdienstschule",
-    "veranstaltung": "Test",
-    "teilnehmer": null,
-    "bemerkung": "",
-    "loeschungAngefordert": true
-  },
-  {
     "id": "b_2026-09-24_Seminarraum5_1790249266421",
     "standort": "Viernheim",
     "raum": "Seminarraum 5",
