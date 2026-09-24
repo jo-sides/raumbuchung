@@ -123,16 +123,6 @@
     "bemerkung": ""
   },
   {
-    "id": "kurs_ViernheimSeminarraum220260925",
-    "standort": "Viernheim",
-    "raum": "Seminarraum 2",
-    "datum": "2026-09-25",
-    "von": "17:00",
-    "bis": "20:00",
-    "status": "genehmigt",
-    "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
-  },
-  {
     "id": "kurs_ViernheimSeminarraum220260924",
     "standort": "Viernheim",
     "raum": "Seminarraum 2",
