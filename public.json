@@ -157,5 +157,15 @@
     "veranstaltung": "Teamsitzung",
     "teilnehmer": 10,
     "bemerkung": ""
+  },
+  {
+    "id": "kurs_ViernheimSeminarraum220260925",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 2",
+    "datum": "2026-09-25",
+    "von": "07:00",
+    "bis": "16:30",
+    "status": "genehmigt",
+    "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
   }
 ]
