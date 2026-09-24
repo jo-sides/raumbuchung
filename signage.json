@@ -10,16 +10,6 @@
     "titel": "Test"
   },
   {
-    "raum": "Seminarraum 5",
-    "kuerzel": "SR5",
-    "pfeil": "↖️",
-    "stock": "2.OG",
-    "datum": "2026-09-23",
-    "von": "11:00",
-    "bis": "13:00",
-    "titel": "Kurs"
-  },
-  {
     "raum": "Seminarraum 2",
     "kuerzel": "SR2",
     "pfeil": "➡️",
