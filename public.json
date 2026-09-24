@@ -133,7 +133,8 @@
     "abteilung": "Rettungsdienstschule",
     "veranstaltung": "FobI",
     "teilnehmer": 15,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   },
   {
     "id": "kurs_ViernheimSeminarraum220260924",
