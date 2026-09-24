@@ -52,6 +52,7 @@
     "von": "09:00",
     "bis": "13:00",
     "status": "genehmigt",
-    "veranstaltung": "Ausbildung zum Brandschutzhelfer (m/w/d)"
+    "veranstaltung": "Ausbildung zum Brandschutzhelfer (m/w/d)",
+    "loeschungAngefordert": true
   }
 ]
