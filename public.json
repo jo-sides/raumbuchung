@@ -123,20 +123,6 @@
     "bemerkung": ""
   },
   {
-    "id": "b_2026-09-24_Seminarraum2_1790238164193",
-    "standort": "Viernheim",
-    "raum": "Seminarraum 2",
-    "datum": "2026-09-24",
-    "von": "08:00",
-    "bis": "16:30",
-    "status": "genehmigt",
-    "abteilung": "Rettungsdienstschule",
-    "veranstaltung": "FobI",
-    "teilnehmer": 15,
-    "bemerkung": "",
-    "loeschungAngefordert": true
-  },
-  {
     "id": "kurs_ViernheimSeminarraum220260924",
     "standort": "Viernheim",
     "raum": "Seminarraum 2",
