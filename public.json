@@ -66,5 +66,18 @@
     "bis": "16:15",
     "status": "genehmigt",
     "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
+  },
+  {
+    "id": "b_2026-09-25_Seminarraum5_1790332537862",
+    "standort": "Viernheim",
+    "raum": "Seminarraum 5",
+    "datum": "2026-09-25",
+    "von": "11:15",
+    "bis": "11:45",
+    "status": "genehmigt",
+    "abteilung": "Hausnotruf",
+    "veranstaltung": "Meeting",
+    "teilnehmer": null,
+    "bemerkung": ""
   }
 ]
