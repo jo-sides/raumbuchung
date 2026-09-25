@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "raum": "Seminarraum 2",
+    "kuerzel": "SR2",
+    "pfeil": "➡️",
+    "stock": "EG",
+    "datum": "2026-09-25",
+    "von": "08:30",
+    "bis": "16:15",
+    "titel": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
+  }
+]
