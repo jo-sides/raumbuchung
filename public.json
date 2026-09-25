@@ -56,15 +56,5 @@
     "veranstaltung": "Test3",
     "teilnehmer": 15,
     "bemerkung": ""
-  },
-  {
-    "id": "kurs_ViernheimSeminarraum220260925",
-    "standort": "Viernheim",
-    "raum": "Seminarraum 2",
-    "datum": "2026-09-25",
-    "von": "08:30",
-    "bis": "16:15",
-    "status": "genehmigt",
-    "veranstaltung": "Erste-Hilfe-Ausbildung / betriebliche Erste-Hilfe-Ausbildung"
   }
 ]
