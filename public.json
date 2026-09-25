@@ -78,6 +78,7 @@
     "abteilung": "Hausnotruf",
     "veranstaltung": "Meeting",
     "teilnehmer": null,
-    "bemerkung": ""
+    "bemerkung": "",
+    "loeschungAngefordert": true
   }
 ]
